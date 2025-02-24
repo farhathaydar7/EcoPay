@@ -18,7 +18,6 @@ CREATE TABLE UserProfiles (
     address VARCHAR(255),
     dob DATE,
     profile_pic VARCHAR(255),
-    id_document VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
@@ -69,5 +68,14 @@ CREATE TABLE OTPs (
     user_id INT,
     otp VARCHAR(255) NOT NULL,
     expiry_timestamp TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+
+-- ID Documents Table
+CREATE TABLE IDDocuments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    link VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );

@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dob = $_POST['dob'] ?? null;
 
         $profilePicPath = null;
-        $idDocumentPath = null;
 
         // Handle profile picture upload
         if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
@@ -56,15 +55,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Invalid ID document type. Only JPG, PNG, GIF, and PDF are allowed.');
             }
             $uniqueName = uniqid('id_doc_', true) . '-' . basename($file['name']);
-            $idDocumentPath = 'uploads/id_documents/' . $uniqueName; // Relative path for DB
+            $idDocumentLink = 'uploads/id_documents/' . $uniqueName; // Relative path for DB
             if (!move_uploaded_file($file['tmp_name'], $idDocumentDir . $uniqueName)) {
                 throw new Exception('Failed to move uploaded ID document.');
             }
+            // Insert ID document link into IDDocuments table
+            $stmt = $pdo->prepare("INSERT INTO IDDocuments (user_id, link) VALUES (?, ?)");
+            $stmt->execute([$userId, $idDocumentLink]);
         }
 
         // Update user profile in database
-        $stmt = $pdo->prepare("INSERT INTO UserProfiles (user_id, address, dob, profile_pic, id_document) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE address = VALUES(address), dob = VALUES(dob), profile_pic = VALUES(profile_pic), id_document = VALUES(id_document)");
-        $stmt->execute([$userId, $address, $dob, $profilePicPath, $idDocumentPath]);
+        $stmt = $pdo->prepare("INSERT INTO UserProfiles (user_id, address, dob, profile_pic) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE address = VALUES(address), dob = VALUES(dob), profile_pic = VALUES(profile_pic)");
+        $stmt->execute([$userId, $address, $dob, $profilePicPath]);
 
         echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully.']);
 

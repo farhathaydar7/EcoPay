@@ -25,11 +25,9 @@ $amount = floatval($amount);
 try {
     $pdo->beginTransaction();
 
-    //direct update
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE user_id = ?");
     $stmt->execute([$amount, $userId]);
-
-    //record transaction
+ //record transaction
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
     $stmt->execute([$userId, 'deposit', $amount, 'completed']);
 
