@@ -53,3 +53,14 @@ CREATE TABLE Transfers (
     FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
+-- Payment Schedules Table
+CREATE TABLE PaymentSchedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(15,2) NOT NULL,
+    frequency ENUM('daily', 'weekly', 'monthly', 'yearly') NOT NULL,
+    next_execution DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+
