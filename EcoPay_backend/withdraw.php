@@ -45,7 +45,7 @@ try {
     $newBalance = $currentBalance - $amount;
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ?");
     $stmt->execute([$newBalance, $userId]);
-
+    //record transaction
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
     $stmt->execute([$userId, 'withdraw', $amount, 'completed']);
 
