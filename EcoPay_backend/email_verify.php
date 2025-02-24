@@ -26,7 +26,7 @@ $userId = $_SESSION["user_id"];
 
 
 $otp = generateDummyOTP();
-
+// I should also readd expiry timestamp for the otp later on 
 //otp should be stored in database
 try {
     $stmt = $pdo->prepare("UPDATE Users SET verification_otp = ? WHERE id = ?");
