@@ -1,5 +1,5 @@
-CREATE DATABASE digital_wallet;
-USE digital_wallet;
+CREATE DATABASE project_ecopay;
+USE project_ecopay;
 
 -- Users Table
 CREATE TABLE Users (
