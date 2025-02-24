@@ -29,3 +29,27 @@ CREATE TABLE Wallets (
     currency VARCHAR(10) DEFAULT 'USD',
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
+
+-- Transactions Table
+CREATE TABLE Transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    type ENUM('deposit', 'withdraw', 'transfer') NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+-- Transfers Table
+CREATE TABLE Transfers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT,
+    receiver_id INT,
+    amount DECIMAL(15,2) NOT NULL,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
