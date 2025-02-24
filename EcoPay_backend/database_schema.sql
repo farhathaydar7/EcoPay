@@ -63,4 +63,11 @@ CREATE TABLE PaymentSchedules (
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
-
+-- OTPs Table
+CREATE TABLE OTPs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    otp VARCHAR(255) NOT NULL,
+    expiry_timestamp TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
