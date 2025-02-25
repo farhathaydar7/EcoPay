@@ -25,7 +25,7 @@ CREATE TABLE UserProfiles (
 CREATE TABLE Wallets (
     user_id INT PRIMARY KEY,
     balance DECIMAL(15,2) DEFAULT 0.00, -- Current wallet balance
-    currency VARCHAR(10) DEFAULT 'USD', -- Default currency
+    currency VARCHAR(10) DEFAULT 'USD', 
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
 );
 
@@ -87,4 +87,12 @@ CREATE TABLE IDDocuments (
     user_id INT, 
     link VARCHAR(255) NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
+);
+-- Admins Table
+CREATE TABLE Admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL, -- Hashed password
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
