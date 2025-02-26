@@ -6,10 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch user info and wallet balance from backend
     axios.post('../../EcoPay_backend/profile.php')
         .then(response => {
-            const userData = response.data;
-            userNameSpan.textContent = userData.name;
-            userEmailSpan.textContent = userData.email;
-            userBalanceSpan.textContent = userData.balance; // Make sure backend returns balance
+            console.log("Full API Response:", response.data); // Debugging log
+
+            if (response.data && response.data.user) {
+                const userData = response.data.user;
+                userNameSpan.textContent = userData.name;
+                userEmailSpan.textContent = userData.email;
+                userBalanceSpan.textContent = userData.balance;
+            } else {
+                throw new Error("User data not found in response.");
+            }
         })
         .catch(error => {
             console.error('Error fetching user data:', error);

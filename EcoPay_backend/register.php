@@ -31,7 +31,17 @@ $hashedPass = password_hash($pass, PASSWORD_DEFAULT);
 try {
     $stmt = $pdo->prepare("INSERT INTO Users (name, email, phone, password) VALUES (?, ?, ?, ?)");
     $stmt->execute([$name, $email, $phone, $hashedPass]);
+    $userId = $pdo->lastInsertId();
+
+    // Create default entries in UserProfiles and Wallets
+    $stmt = $pdo->prepare("INSERT INTO UserProfiles (user_id) VALUES (?)");
+    $stmt->execute([$userId]);
+
+    $stmt = $pdo->prepare("INSERT INTO Wallets (user_id) VALUES (?)");
+    $stmt->execute([$userId]);
+
     echo "User registered!";
+
 } catch (PDOException $e) {
     if ($e->getCode() == 23000 && strpos($e->getMessage(), 'phone')) {
         echo "Phone number already in use.";
