@@ -33,6 +33,10 @@ try {
     $stmt->execute([$name, $email, $phone, $hashedPass]);
     echo "User registered!";
 } catch (PDOException $e) {
-    echo "Registration error: " . $e->getMessage();
+    if ($e->getCode() == 23000 && strpos($e->getMessage(), 'phone')) {
+        echo "Phone number already in use.";
+    } else {
+        echo "Registration error: " . $e->getMessage();
+    }
 }
 ?>
