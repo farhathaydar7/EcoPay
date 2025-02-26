@@ -3,22 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageDiv = document.getElementById('message');
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
-    const balanceInput = document.getElementById('balance');
     const addressInput = document.getElementById('address');
     const dobInput = document.getElementById('dob');
     const profilePicInput = document.getElementById('profile_pic');
     const idDocumentInput = document.getElementById('id_document');
 
     // Fetch user profile data on page load (GET request to profile.php)
-    axios.post('../../EcoPay_backend/profile.php')
+    axios.get('../../EcoPay_backend/profile.php')
         .then(response => {
             if (response.data.status === 'success') {
-                const user = response.data.user;
-                nameInput.value = user.name;
-                emailInput.value = user.email;
-                balanceInput.value = user.balance;
-                addressInput.value = user.address || '';
-                dobInput.value = user.dob || '';
+                const userData = response.data.user;
+                nameInput.value = userData.name;
+                emailInput.value = userData.email;
+                addressInput.value = userData.address || '';
+                dobInput.value = userData.dob || '';
+
             } else {
                 messageDiv.textContent = 'Error loading profile: ' + response.data.message;
                 messageDiv.classList.add('error');
@@ -52,7 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const user = response.data.user;
                 nameInput.value = user.name;
                 emailInput.value = user.email;
-                balanceInput.value = user.balance;
+                addressInput.value = user.address || '';
+                dobInput.value = user.dob || '';
+
             } else {
                 messageDiv.textContent = response.data.message;
                 messageDiv.classList.add('error');
@@ -63,5 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.textContent = 'Failed to update profile.';
             messageDiv.classList.add('error');
         });
+    });
+
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const saveProfileBtn = document.getElementById('save-profile-btn');
+    const editableInputs = document.querySelectorAll('.editable-input');
+
+    editProfileBtn.addEventListener('click', function() {
+        editableInputs.forEach(input => {
+            input.removeAttribute('readonly');
+        });
+        editProfileBtn.style.display = 'none';
+        saveProfileBtn.style.display = 'block';
+    });
+
+    saveProfileBtn.addEventListener('click', function() {
+        profileForm.requestSubmit(); // Programmatically submit the form
     });
 });

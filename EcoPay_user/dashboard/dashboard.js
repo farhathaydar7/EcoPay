@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const userBalanceSpan = document.getElementById('user-balance');
 
     // Fetch user info and wallet balance from backend
-    axios.post('../../EcoPay_backend/profile.php')
+    axios.request({
+        url: '../../EcoPay_backend/profile.php',
+        method: 'GET'
+    })
         .then(response => {
             console.log("Full API Response:", response.data); // Debugging log
 
