@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profilePicInput = document.getElementById('profile_pic');
     const idDocumentInput = document.getElementById('id_document');
 
-    // Fetch user profile data on page load
+    // Fetch user profile data on page load (GET request to profile.php)
     axios.post('../../EcoPay_backend/profile.php')
         .then(response => {
             if (response.data.status === 'success') {
@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData(profileForm);
 
-        axios.post('../../EcoPay_backend/profile.php', formData, {
+        // Send profile update data (POST request to update_profile.php)
+        axios.post('../../EcoPay_backend/update_profile.php', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

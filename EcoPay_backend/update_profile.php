@@ -22,15 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $userId = $_SESSION["user_id"];
 $response_data = [];
 
-$profilePicDir = 'C:/xampp/htdocs/Project_EcoPay/EcoPay_backend/uploads/profile_pics/';
-$idDocumentDir = 'C:/xampp/htdocs/Project_EcoPay/EcoPay_backend/uploads/id_documents/';
+$uploadsDir = 'C:/xampp/htdocs/Project_EcoPay/EcoPay_backend/uploads/';
 
 // Ensure directories exist
-if (!is_dir($profilePicDir)) {
-    mkdir($profilePicDir, 0775, true);
-}
-if (!is_dir($idDocumentDir)) {
-    mkdir($idDocumentDir, 0775, true);
+if (!is_dir($uploadsDir)) {
+    mkdir($uploadsDir, 0775, true);
 }
 
 try {
@@ -46,8 +42,8 @@ try {
             throw new Exception('Invalid profile picture type. Only JPG, PNG, and GIF are allowed.');
         }
         $uniqueName = uniqid('profile_pic_', true) . '-' . basename($file['name']);
-        $profilePicPath = 'uploads/profile_pics/' . $uniqueName;
-        if (!move_uploaded_file($file['tmp_name'], $profilePicDir . $uniqueName)) {
+        $profilePicPath = $uniqueName;
+        if (!move_uploaded_file($file['tmp_name'], $uploadsDir . $uniqueName)) {
             throw new Exception('Failed to move uploaded profile picture.');
         }
     }
@@ -60,8 +56,8 @@ try {
             throw new Exception('Invalid ID document type. Only JPG, PNG, GIF, and PDF are allowed.');
         }
         $uniqueName = uniqid('id_doc_', true) . '-' . basename($file['name']);
-        $idDocumentLink = 'uploads/id_documents/' . $uniqueName;
-        if (!move_uploaded_file($file['tmp_name'], $idDocumentDir . $uniqueName)) {
+        $idDocumentLink = $uniqueName;
+        if (!move_uploaded_file($file['tmp_name'], $uploadsDir . $uniqueName)) {
             throw new Exception('Failed to move uploaded ID document.');
         }
         $stmt = $pdo->prepare("INSERT INTO IDDocuments (user_id, link) VALUES (?, ?)");
