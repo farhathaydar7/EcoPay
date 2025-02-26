@@ -11,9 +11,28 @@ if (!isset($_SESSION["user_id"])) {
     http_response_code(401); // Unauthorized
     echo json_encode(['status' => 'error', 'message' => 'User not logged in.']);
     exit;
+    exit;
 }
 
 $userId = $_SESSION["user_id"];
+
+try {
+    $stmt = $pdo->prepare("SELECT Users.name, Users.email, Wallets.balance FROM Users INNER JOIN Wallets ON Users.id = Wallets.user_id WHERE Users.id = ?");
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+        echo json_encode($user);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'User profile not found.']);
+    }
+
+} catch (PDOException $e) {
+    http_response_code(500); // Internal Server Error
+    echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
+    exit;
+}
+
 
 $profilePicDir = 'C:/xampp/htdocs/Project_EcoPay/EcoPay_backend/uploads/profile_pics/';
 $idDocumentDir = 'C:/xampp/htdocs/Project_EcoPay/EcoPay_backend/uploads/id_documents/';

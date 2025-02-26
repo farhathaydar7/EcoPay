@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             messageDiv.textContent = response.data;
             if (response.data.includes('Login successful')) {
-                // Redirect 
-                // window.location.href = 'location.html'; 
+                // Redirect to dashboard after successful login
+                window.location.href = '../dashboard/dashboard.html';
             }
         } catch (error) {
             console.error('Login failed:', error);

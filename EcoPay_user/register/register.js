@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             messageDiv.textContent = response.data;
             if (response.data.includes('Registration successful')) {
-                // Redirect or perform actions after successful registration
-                // For example, redirect to login page
+                // Redirect or do something 
                 // window.location.href = 'login.html';
             }
         } catch (error) {
