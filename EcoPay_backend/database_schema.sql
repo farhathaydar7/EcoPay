@@ -6,7 +6,7 @@ CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     name VARCHAR(100) NOT NULL, 
     email VARCHAR(150) UNIQUE NOT NULL, 
-    phone VARCHAR(20) UNIQUE NOT NULL, 
+    phone VARCHAR(20) UNIQUE NOT NULL, make
     password VARCHAR(255) NOT NULL, -- Hashed password
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
     -- verification_status ENUM('unverified', 'pending', 'verified') DEFAULT 'unverified', -- Moved to VerificationStatuses table
@@ -23,10 +23,32 @@ CREATE TABLE UserProfiles (
 
 -- Wallets Table
 CREATE TABLE Wallets (
-    user_id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    wallet_number INT NOT NULL, -- To distinguish between multiple wallets for a user
     balance DECIMAL(15,2) DEFAULT 0.00, -- Current wallet balance
-    currency VARCHAR(10) DEFAULT 'USD', 
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
+    currency VARCHAR(10) DEFAULT 'USD',
+    UNIQUE (user_id, wallet_number), -- Ensure each user can have up to 3 wallets
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+-- Cards Table
+CREATE TABLE Cards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    wallet_id INT,
+    card_number VARCHAR(255) UNIQUE NOT NULL, -- Or other relevant card details
+    FOREIGN KEY (wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE
+);
+
+-- BorrowedCards Table
+CREATE TABLE BorrowedCards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    borrower_wallet_id INT UNIQUE NOT NULL, -- Each wallet can borrow only one card at a time
+    owner_card_id INT NOT NULL,
+    borrowed_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_date TIMESTAMP NULL, -- or use a boolean 'is_returned'
+    FOREIGN KEY (borrower_wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE,
+    FOREIGN KEY (owner_card_id) REFERENCES Cards(id) ON DELETE CASCADE
 );
 
 -- Transactions Table
