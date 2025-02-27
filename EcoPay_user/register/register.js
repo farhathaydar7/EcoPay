@@ -16,22 +16,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const formData = new FormData();
-            formData.append('fullName', name);
-            formData.append('email', email);
-            formData.append('phone', phone);
-            formData.append('password', password);
+            const userData = {
+                name: name,
+                email: email,
+                phone: phone,
+                password: password
+            };
 
-            const response = await axios.post('../../EcoPay_backend/register.php', formData);
+            const response = await axios.post('../../EcoPay_backend/register.php', userData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            messageDiv.textContent = response.data;
-            if (response.data.includes('Registration successful')) {
-                // Redirect or do something 
+            // Ensure response is an object and check `status`
+            if (response.data && response.data.status === 'success') {
+                messageDiv.textContent = response.data.message;
+                messageDiv.classList.remove('error');
+                messageDiv.classList.add('success');
+                // Redirect to login or dashboard if needed
                 // window.location.href = 'login.html';
+            } else {
+                messageDiv.textContent = response.data.message || 'Registration failed.';
+                messageDiv.classList.remove('success');
+                messageDiv.classList.add('error');
             }
         } catch (error) {
             console.error('Registration failed:', error);
             messageDiv.textContent = 'Registration failed. Please check your information and try again.';
+            messageDiv.classList.remove('success');
+            messageDiv.classList.add('error');
         }
     });
 });

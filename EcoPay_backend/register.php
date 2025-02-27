@@ -1,52 +1,49 @@
 <?php
+header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once 'db_connection.php';
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    echo "POST requests only.";
+$data = json_decode(file_get_contents("php://input"), true);
+$response = [];
+
+if (!isset($data['name'], $data['email'], $data['phone'], $data['password'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Missing required fields.']);
     exit;
 }
 
-$name = $_POST["fullName"];
-$email = $_POST["email"];
-$phone = $_POST["phone"];
-$pass = $_POST["password"];
-
-if (empty($name) || empty($email) || empty($phone) || empty($pass)) {
-    echo "All fields required.";
-    exit;
-}
-
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo "Invalid email.";
-    exit;
-}
-
-if (!preg_match('/^[0-9]{8}$/', $phone)) {
-    echo "Invalid phone (8 digits).";
-    exit;
-}
-
-$hashedPass = password_hash($pass, PASSWORD_DEFAULT);
+$name = trim($data['name']);
+$email = trim($data['email']);
+$phone = trim($data['phone']);
+$password = password_hash($data['password'], PASSWORD_BCRYPT);
 
 try {
+    $pdo->beginTransaction();
+
     $stmt = $pdo->prepare("INSERT INTO Users (name, email, phone, password) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$name, $email, $phone, $hashedPass]);
+    $stmt->execute([$name, $email, $phone, $password]);
     $userId = $pdo->lastInsertId();
 
-    // Create default entries in UserProfiles and Wallets
     $stmt = $pdo->prepare("INSERT INTO UserProfiles (user_id) VALUES (?)");
     $stmt->execute([$userId]);
 
-    $stmt = $pdo->prepare("INSERT INTO Wallets (user_id) VALUES (?)");
+    $stmt = $pdo->prepare("INSERT INTO Wallets (user_id, wallet_number, balance, currency) VALUES (?, 1, 0.00, 'USD')");
     $stmt->execute([$userId]);
 
-    echo "User registered!";
+    $stmt = $pdo->prepare("INSERT INTO VerificationStatuses (user_id, email_verified, document_verified, super_verified) VALUES (?, FALSE, FALSE, FALSE)");
+    $stmt->execute([$userId]);
 
+    $pdo->commit();
+
+    echo json_encode(['status' => 'success', 'message' => 'User registered successfully.', 'user_id' => $userId]);
 } catch (PDOException $e) {
-    if ($e->getCode() == 23000 && strpos($e->getMessage(), 'phone')) {
-        echo "Phone number already in use.";
-    } else {
-        echo "Registration error: " . $e->getMessage();
-    }
+    $pdo->rollBack();
+    error_log('Registration error: ' . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
 }
-?>
