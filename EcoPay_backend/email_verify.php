@@ -24,6 +24,11 @@ if (!isset($_SESSION["user_id"])) {
 
 $userId = $_SESSION["user_id"];
 
+// Super Verification Check - Email verification doesn't require super verification
+// if (!isSuperVerified($pdo, $userId)) {
+//     echo "User is not super verified.";
+//     exit;
+// }
 
 $otp = generateDummyOTP();
 // I should also readd expiry timestamp for the otp later on 

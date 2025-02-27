@@ -11,4 +11,12 @@ try {
     echo "Connection failed: " . $e->getMessage();
     die(); 
 }
+
+function isSuperVerified($pdo, $userId) {
+    $stmt = $pdo->prepare("SELECT super_verified FROM VerificationStatuses WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $verificationStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $verificationStatus && $verificationStatus['super_verified'];
+}
 ?>

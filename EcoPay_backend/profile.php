@@ -11,7 +11,7 @@ if (!isset($_SESSION["user_id"])) {
     echo json_encode($response_data);
     exit;
 }
-
+ 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     $response_data = ['status' => 'error', 'message' => 'Invalid request method. GET required.'];
@@ -20,10 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $userId = $_SESSION["user_id"];
+
+// Super Verification Check
 $response_data = [];
 
 try {
-    $stmt = $pdo->prepare("SELECT Users.name, Users.email, Wallets.balance, UserProfiles.address, UserProfiles.dob, UserProfiles.profile_pic FROM Users INNER JOIN Wallets ON Users.id = Wallets.user_id LEFT JOIN UserProfiles ON Users.id = UserProfiles.user_id WHERE Users.id = ?");
+    // Fetch balance from the first wallet (wallet_number = 1) and verification status
+    $stmt = $pdo->prepare("
+        SELECT Users.name, Users.email, Wallets.balance,
+               UserProfiles.address, UserProfiles.dob, UserProfiles.profile_pic,
+               VerificationStatuses.document_verified
+        FROM Users
+        INNER JOIN Wallets ON Users.id = Wallets.user_id AND Wallets.wallet_number = 1
+        LEFT JOIN UserProfiles ON Users.id = UserProfiles.user_id
+        LEFT JOIN VerificationStatuses ON Users.id = VerificationStatuses.user_id
+        WHERE Users.id = ?
+    ");
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

@@ -171,6 +171,14 @@ button[type="submit"]:hover {
     margin-bottom: 30px;
 }
 
+#profile-pic-display {
+    display: block;
+    margin: 0 auto 20px; /* Center image and add margin below */
+    border-radius: 50%;    /* Make it circular */
+    max-width: 150px;     /* Adjust size as needed */
+    height: auto;
+}
+
 /* Responsiveness  */
 @media (max-width: 768px) {
     .container, .login-container, .register-container, .dashboard-container, .profile-container {

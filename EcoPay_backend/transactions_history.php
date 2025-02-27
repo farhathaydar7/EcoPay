@@ -9,6 +9,12 @@ if (!isset($_SESSION["user_id"])) {
 
 $userId = $_SESSION["user_id"];
 
+// Super Verification Check
+if (!isSuperVerified($pdo, $userId)) {
+    echo "User is not super verified.";
+    exit;
+}
+
 try {
     // --- Fetch  History ---
     $stmt = $pdo->prepare("SELECT * FROM Transactions WHERE user_id = ? ORDER BY timestamp DESC");

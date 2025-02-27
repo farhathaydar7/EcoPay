@@ -9,9 +9,15 @@ if (!isset($_SESSION["user_id"])) {
 
 $userId = $_SESSION["user_id"];
 
+// Super Verification Check
+if (!isSuperVerified($pdo, $userId)) {
+    echo "User is not super verified.";
+    exit;
+}
+
 try {
-    // --- Fetch Wallet Balance ---
-    $stmt = $pdo->prepare("SELECT balance, currency FROM Wallets WHERE user_id = ?");
+    // --- Fetch Wallet Balance from the first wallet (wallet_number = 1) ---
+    $stmt = $pdo->prepare("SELECT balance, currency FROM Wallets WHERE user_id = ? AND wallet_number = 1");
     $stmt->execute([$userId]);
     $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
 

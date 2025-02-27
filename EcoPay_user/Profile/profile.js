@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profilePicInput = document.getElementById('profile_pic');
     const idDocumentInput = document.getElementById('id_document');
 
-    // Fetch user profile data on page load (GET request to profile.php)
+    // Fetch user profile data on page load
     axios.get('../../EcoPay_backend/profile.php')
         .then(response => {
             if (response.data.status === 'success') {
@@ -17,6 +17,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailInput.value = userData.email;
                 addressInput.value = userData.address || '';
                 dobInput.value = userData.dob || '';
+
+                // Fetch and display profile picture
+                axios.get('../../EcoPay_backend/get_pfp.php')
+                    .then(pfpResponse => {
+                        if (pfpResponse.data.status === 'success' && pfpResponse.data.profile_pic_path) {
+                            const profilePic = document.getElementById('profile-pic-display');
+                            profilePic.src = '../../uploads' + pfpResponse.data.profile_pic_path;
+                            profilePic.style.display = 'block';
+                        } else {
+                            document.getElementById('profile-pic-display').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching profile picture:', error);
+                    });
+
+                // Check and display document verification status (rest of your code)
+                const idDocumentInput = document.getElementById('id_document');
+                if (userData.document_verified === 1) {
+                    messageDiv.textContent = 'ID Document Verified.';
+                    messageDiv.classList.add('success');
+                    idDocumentInput.disabled = true;
+                } else if (userData.document_verified === 0) {
+                    messageDiv.textContent = 'ID Document Pending Verification.';
+                    messageDiv.classList.add('error'); // Or use a different class like 'warning'
+                    idDocumentInput.disabled = true; // Disable file input if pending
+                } else {
+                    idDocumentInput.disabled = false; // Enable if no verification status
+                }
 
             } else {
                 messageDiv.textContent = 'Error loading profile: ' + response.data.message;

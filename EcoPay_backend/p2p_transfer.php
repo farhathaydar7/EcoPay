@@ -13,6 +13,22 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $senderId = $_SESSION["user_id"];
+
+// Super Verification Check
+if (!isSuperVerified($pdo, $senderId)) {
+    echo "User is not super verified.";
+    exit;
+}
+
+$receiverIdentifier = $_POST["receiver_identifier"]; // Should be email
+$amount = $_POST["amount"];
+
+if (empty($receiverIdentifier) || empty($amount) || !is_numeric($amount) || $amount <= 0) {
+    echo "POST requests only.";
+    exit;
+}
+
+$senderId = $_SESSION["user_id"];
 $receiverIdentifier = $_POST["receiver_identifier"]; // Should be email
 $amount = $_POST["amount"];
 
@@ -57,10 +73,12 @@ try {
 
     // --- Update Balances ---
     $newSenderBalance = $senderWallet["balance"] - $amount;
-    $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ?");
+    // Assuming transfer from the sender's first wallet (wallet_number = 1)
+    $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ? AND wallet_number = 1");
     $stmt->execute([$newSenderBalance, $senderId]);
 
-    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE user_id = ?");
+    // Assuming transfer to the receiver's first wallet (wallet_number = 1)
+    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE user_id = ? AND wallet_number = 1");
     $stmt->execute([$amount, $receiverId]);
 
     // --- Record Transactions ---

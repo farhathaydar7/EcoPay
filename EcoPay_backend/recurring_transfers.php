@@ -6,6 +6,8 @@ require_once 'db_connection.php';
 try {
     $pdo->beginTransaction();
 
+   // No session or user context here, as this is a cron job script
+
     // --- Fetch Payment Schedules Due for Execution ---
     $currentTimestamp = date('Y-m-d H:i:s');
     $stmt = $pdo->prepare("SELECT * FROM PaymentSchedules WHERE next_execution <= ?");
@@ -39,7 +41,8 @@ try {
             // --- Update Balances (Assuming transfer to system or another predefined account for simplicity) ---
             // In a real scenario, you might have receiver_id in PaymentSchedules or handle different types of recurring payments
             $newSenderBalance = $senderWallet["balance"] - $amount;
-            $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ?");
+            // Assuming transfer from the first wallet (wallet_number = 1)
+            $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ? AND wallet_number = 1");
             $stmt->execute([$newSenderBalance, $userId]);
 
             // --- Record Transactions ---
