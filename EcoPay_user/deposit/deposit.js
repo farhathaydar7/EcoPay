@@ -1,11 +1,9 @@
+    const API_BASE_URL = '../../EcoPay_backend/';
 async function fetchWallets() {
     const mockUserId = document.getElementById('mock_user_id').value;
-    // In a real application, you would get the user ID from the session.
-    // Here, we're using a mock user ID.
-
     try {
-        const response = await axios.get('../../EcoPay_backend/get_wallets.php');
-
+        const response = await axios.get(API_BASE_URL + 'get_wallets.php');
+        
         if (response.data.status === 'success') {
             const walletSelect = document.getElementById('wallet');
             response.data.wallets.forEach(wallet => {
@@ -43,7 +41,7 @@ async function deposit() {
 
     try {
       // First, check if the user is super verified
-      const profileResponse = await axios.get('../../EcoPay_backend/profile.php');
+      const profileResponse = await axios.get(API_BASE_URL + 'profile.php');
 
       if (profileResponse.data.status !== 'success') {
           messageDiv.textContent = profileResponse.data.message;
@@ -55,22 +53,26 @@ async function deposit() {
           return;
       }
 
-        const depositResponse = await axios.post('../../EcoPay_backend/deposit.php', {
-            wallet_id: walletId,
-            amount: amount
-        });
+        const depositResponse = await axios.post(API_BASE_URL + 'deposit.php', 
+            new URLSearchParams({
+                wallet_id: walletId,
+                amount: amount
+            })
+        );
 
-        messageDiv.textContent = depositResponse.data;
-        messageDiv.style.color = 'green';
-
+        if (depositResponse.data && depositResponse.data.error) {
+            console.error("Deposit error:", depositResponse.data.error);
+            messageDiv.textContent = "An error occurred during deposit.";
+            messageDiv.style.color = 'red';
+        } else {
+            messageDiv.textContent = depositResponse.data;
+            messageDiv.style.color = 'green';
+        }
 
     } catch (error) {
         console.error("Error during deposit:", error);
         messageDiv.textContent = "An error occurred during deposit.";
-         if (error.response && error.response.data) {
-            messageDiv.textContent = error.response.data;
-        }
-        messageDiv.style.color = 'red';
+         messageDiv.style.color = 'red';
 
     }
 }
