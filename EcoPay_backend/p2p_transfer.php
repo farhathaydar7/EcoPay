@@ -20,9 +20,17 @@ if (!isSuperVerified($pdo, $senderId)) {
     exit;
 }
 
-$receiverIdentifier = $_POST["receiver_identifier"]; // Should be email
-$senderWalletId = $_POST["sender_wallet_id"];
-$amount = $_POST["amount"];
+$rawData = file_get_contents("php://input");
+$data = json_decode($rawData, true);
+
+if (!$data) {
+    echo "Invalid JSON request.";
+    exit;
+}
+
+$receiverIdentifier = $data["receiver_identifier"] ?? null; // Should be email
+$senderWalletId = $data["sender_wallet_id"] ?? null;
+$amount = $data["amount"] ?? null;
 
 if (
     empty($receiverIdentifier) || 
@@ -95,13 +103,6 @@ try {
         echo "Receiver wallet not found or does not belong to receiver.";
         exit;
     }
-
-    // --- Record Transactions ---
-    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status, wallet_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$senderId, 'transfer', -$amount, 'completed', $senderWalletId]); // Negative amount for sender
-
-    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status, wallet_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$receiverId, 'transfer', $amount, 'completed', $receiverWalletId]); // Positive amount for receiver
 
     // --- Record Transfer Details ---
     $stmt = $pdo->prepare("INSERT INTO Transfers (sender_id, receiver_id, amount, sender_wallet_id, receiver_wallet_id, status) VALUES (?, ?, ?, ?, ?, ?)");

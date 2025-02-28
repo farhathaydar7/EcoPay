@@ -6,12 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch wallets and populate the select element
     async function populateWallets() {
         try {
-            const response = await axios.get(api_base_url + 'get_wallets.php');
+            const response = await axios.get('../../EcoPay_backend/get_wallets.php');
             if (response.data.status === 'success' && response.data.wallets) {
                 response.data.wallets.forEach(wallet => {
                     const option = document.createElement('option');
                     option.value = wallet.wallet_id;
-                    option.textContent = `${wallet.wallet_name} - ${wallet.currency} ${wallet.balance}`;
+                    option.textContent = `${wallet.wallet_name} (${wallet.currency})`;
                     senderWalletSelect.appendChild(option);
                 });
             } else {
