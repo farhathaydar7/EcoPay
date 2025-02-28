@@ -20,11 +20,13 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-
 try {
-    // Insert admin user with plain text password - INSECURE
+    // Hash the password
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+    // Insert admin user with hashed password
     $stmt = $pdo->prepare("INSERT INTO Admins (name, email, password) VALUES (?, ?, ?)");
-    $stmt->execute([$name, $email, $password]); // Plain text password
+    $stmt->execute([$name, $email, $hashedPassword]);
     echo "Admin registered!";
 } catch (PDOException $e) {
     echo "Registration error: " . $e->getMessage();

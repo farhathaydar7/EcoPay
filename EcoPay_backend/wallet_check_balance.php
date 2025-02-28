@@ -8,6 +8,12 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $userId = $_SESSION["user_id"];
+$walletId = $_GET["wallet_id"]; // Get wallet_id from GET request
+
+if (!isset($walletId) || !is_numeric($walletId)) {
+    echo "Invalid wallet ID.";
+    exit;
+}
 
 // Super Verification Check
 if (!isSuperVerified($pdo, $userId)) {
@@ -16,15 +22,15 @@ if (!isSuperVerified($pdo, $userId)) {
 }
 
 try {
-    // --- Fetch Wallet Balance from the first wallet (wallet_number = 1) ---
-    $stmt = $pdo->prepare("SELECT balance, currency FROM Wallets WHERE user_id = ? AND wallet_number = 1");
-    $stmt->execute([$userId]);
+    // --- Fetch Wallet Balance from the specified wallet ---
+    $stmt = $pdo->prepare("SELECT balance, currency FROM Wallets WHERE id = ? AND user_id = ?");
+    $stmt->execute([$walletId, $userId]);
     $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($wallet) {
-        echo "Your balance is: " . htmlspecialchars($wallet["balance"]) . " " . htmlspecialchars($wallet["currency"]);
+        echo "Wallet balance: " . htmlspecialchars($wallet["balance"]) . " " . htmlspecialchars($wallet["currency"]);
     } else {
-        echo "Wallet not found.";
+        echo "Wallet not found or does not belong to user.";
     }
 
 } catch (PDOException $e) {

@@ -25,22 +25,49 @@ $userId = $_SESSION["user_id"];
 $response_data = [];
 
 try {
-    // Fetch balance from the first wallet (wallet_number = 1) and verification status
+    // Fetch user info and verification status
     $stmt = $pdo->prepare("
-        SELECT Users.name, Users.email, Wallets.balance,
-               UserProfiles.address, UserProfiles.dob, UserProfiles.profile_pic,
-               VerificationStatuses.document_verified
-        FROM Users
-        INNER JOIN Wallets ON Users.id = Wallets.user_id AND Wallets.wallet_number = 1
-        LEFT JOIN UserProfiles ON Users.id = UserProfiles.user_id
-        LEFT JOIN VerificationStatuses ON Users.id = VerificationStatuses.user_id
-        WHERE Users.id = ?
+        SELECT
+            Users.userName,
+            Users.fName,
+            Users.lName,
+            Users.email,
+            UserProfiles.address,
+            UserProfiles.dob,
+            UserProfiles.profile_pic,
+            VerificationStatuses.document_verified,
+            VerificationStatuses.super_verified
+        FROM
+            Users
+        LEFT JOIN
+            UserProfiles ON Users.id = UserProfiles.user_id
+        LEFT JOIN
+            VerificationStatuses ON Users.id = VerificationStatuses.user_id
+        WHERE
+            Users.id = ?
     ");
     $stmt->execute([$userId]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
-        $response_data = ['status' => 'success', 'user' => $user];
+    if ($result) {
+        // Structure the data
+        $userData = [
+            'userName' => $result['userName'],
+            'fName' => $result['fName'],
+            'lName' => $result['lName'],
+            'email' => $result['email'],
+            'address' => $result['address'],
+            'dob' => $result['dob'],
+            'profile_pic' => $result['profile_pic'],
+            'document_verified' => $result['document_verified'],
+            'super_verified' => $result['super_verified'],
+            'name' => $result['fName'] . ' ' . $result['lName']
+        ];
+
+        $response_data = [
+            'status' => 'success',
+            'user' => $userData
+        ];
     } else {
         $response_data = ['status' => 'error', 'message' => 'User profile not found.'];
     }
@@ -49,7 +76,7 @@ try {
     http_response_code(500);
     error_log('PDOException in profile.php: ' . $e->getMessage() . ', User ID: ' . $userId);
     $response_data = ['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()];
+} finally {
+    echo json_encode($response_data);
+    exit;
 }
-
-echo json_encode($response_data);
-exit;

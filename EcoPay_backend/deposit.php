@@ -20,18 +20,11 @@ if (!isSuperVerified($pdo, $userId)) {
     exit;
 }
 
+$walletId = $_POST["wallet_id"];
 $amount = $_POST["amount"];
 
-if (empty($amount) || !is_numeric($amount) || $amount <= 0) {
-    echo "POST requests only.";
-    exit;
-}
-
-$userId = $_SESSION["user_id"];
-$amount = $_POST["amount"];
-
-if (empty($amount) || !is_numeric($amount) || $amount <= 0) {
-    echo "Invalid deposit amount.";
+if (empty($walletId) || !is_numeric($walletId) || empty($amount) || !is_numeric($amount) || $amount <= 0) {
+    echo "Invalid request parameters.";
     exit;
 }
 
@@ -40,13 +33,20 @@ $amount = floatval($amount);
 try {
     $pdo->beginTransaction();
 
-    // Assuming depositing into the first wallet (wallet_number = 1)
-    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE user_id = ? AND wallet_number = 1");
-    $stmt->execute([$amount, $userId]);
+    // --- Depositing into the specified wallet ---
+    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$amount, $walletId, $userId]);
+
+    // Check if the wallet was updated
+    if ($stmt->rowCount() == 0) {
+        $pdo->rollBack();
+        echo "Wallet not found or does not belong to user.";
+        exit;
+    }
 
     // Record transaction
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$userId, 'deposit', $amount, 'completed']);
+    $stmt->execute([$userId, 'deposit', $amount, 'completed']); // Credit transaction
 
     $pdo->commit();
     echo "Deposit successful!";

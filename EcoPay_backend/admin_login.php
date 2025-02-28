@@ -21,7 +21,7 @@ try {
     $stmt->execute([$email]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($admin && $password === $admin["password"]) { // Direct password comparison - NO HASHING
+    if ($admin && password_verify($password, $admin["password"])) {
         $_SESSION["admin_id"] = $admin["id"];
         echo "Admin login successful!";
     } else {

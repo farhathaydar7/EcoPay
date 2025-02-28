@@ -21,19 +21,15 @@ if (!isSuperVerified($pdo, $senderId)) {
 }
 
 $receiverIdentifier = $_POST["receiver_identifier"]; // Should be email
+$senderWalletId = $_POST["sender_wallet_id"];
 $amount = $_POST["amount"];
 
-if (empty($receiverIdentifier) || empty($amount) || !is_numeric($amount) || $amount <= 0) {
-    echo "POST requests only.";
-    exit;
-}
-
-$senderId = $_SESSION["user_id"];
-$receiverIdentifier = $_POST["receiver_identifier"]; // Should be email
-$amount = $_POST["amount"];
-
-if (empty($receiverIdentifier) || empty($amount) || !is_numeric($amount) || $amount <= 0) {
-    echo "Invalid input.";
+if (
+    empty($receiverIdentifier) || 
+    empty($senderWalletId) || !is_numeric($senderWalletId) ||
+    empty($amount) || !is_numeric($amount) || $amount <= 0
+) {
+    echo "Invalid request parameters.";
     exit;
 }
 
@@ -61,36 +57,63 @@ try {
     }
 
     // --- Check Sender Balance ---
-    $stmt = $pdo->prepare("SELECT balance FROM Wallets WHERE user_id = ?");
-    $stmt->execute([$senderId]);
+    $stmt = $pdo->prepare("SELECT balance FROM Wallets WHERE id = ? AND user_id = ?");
+    $stmt->execute([$senderWalletId, $senderId]);
     $senderWallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$senderWallet || $senderWallet["balance"] < $amount) {
-        echo "Insufficient balance.";
+        echo "Insufficient balance in sender's wallet.";
         $pdo->rollBack();
         exit;
     }
 
     // --- Update Balances ---
     $newSenderBalance = $senderWallet["balance"] - $amount;
-    // Assuming transfer from the sender's first wallet (wallet_number = 1)
-    $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ? AND wallet_number = 1");
-    $stmt->execute([$newSenderBalance, $senderId]);
+    // Transfer from sender's specified wallet
+    $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$newSenderBalance, $senderWalletId, $senderId]);
 
-    // Assuming transfer to the receiver's first wallet (wallet_number = 1)
-    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE user_id = ? AND wallet_number = 1");
-    $stmt->execute([$amount, $receiverId]);
+    // Allow sender to also specify receiver's wallet
+    $receiverWalletId = $_POST["receiver_wallet_id"];
+
+    if (empty($receiverWalletId) || !is_numeric($receiverWalletId)) {
+      echo "Invalid receiver wallet ID.";
+      $pdo->rollBack();
+      exit;
+    }
+
+    // --- Check Receiver Wallet ---
+    $stmt = $pdo->prepare("SELECT id FROM Wallets WHERE id = ? AND user_id = ?");
+    $stmt->execute([$receiverWalletId, $receiverId]);
+    $receiverWallet = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$receiverWallet) {
+        echo "Receiver wallet not found or does not belong to receiver.";
+        $pdo->rollBack();
+        exit;
+    }
+
+    // --- Transfer to receiver's specified wallet ---
+    $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$amount, $receiverWalletId, $receiverId]);
+
+    // Check if receiver wallet was updated
+    if ($stmt->rowCount() == 0) {
+        $pdo->rollBack();
+        echo "Receiver wallet not found or does not belong to receiver.";
+        exit;
+    }
 
     // --- Record Transactions ---
-    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$senderId, 'transfer', -$amount, 'completed']); // Negative amount for sender
+    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status, wallet_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$senderId, 'transfer', -$amount, 'completed', $senderWalletId]); // Negative amount for sender
 
-    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$receiverId, 'transfer', $amount, 'completed']); // Positive amount for receiver
+    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status, wallet_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$receiverId, 'transfer', $amount, 'completed', $receiverWalletId]); // Positive amount for receiver
 
     // --- Record Transfer Details ---
-    $stmt = $pdo->prepare("INSERT INTO Transfers (sender_id, receiver_id, amount, status) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$senderId, $receiverId, $amount, 'completed']);
+    $stmt = $pdo->prepare("INSERT INTO Transfers (sender_id, receiver_id, amount, sender_wallet_id, receiver_wallet_id, status) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$senderId, $receiverId, $amount, $senderWalletId, $receiverWalletId, 'completed']);
 
     $pdo->commit();
     echo "Transfer successful!";

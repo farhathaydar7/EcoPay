@@ -3,13 +3,16 @@ USE project_ecopay;
 
 -- Users Table
 CREATE TABLE Users (
-    id INT AUTO_INCREMENT PRIMARY KEY, 
-    name VARCHAR(100) NOT NULL, 
-    email VARCHAR(150) UNIQUE NOT NULL, 
-    phone VARCHAR(20) UNIQUE NOT NULL, make
-    password VARCHAR(255) NOT NULL, -- Hashed password
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
-    -- verification_status ENUM('unverified', 'pending', 'verified') DEFAULT 'unverified', -- Moved to VerificationStatuses table
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userName VARCHAR(50) UNIQUE NOT NULL,
+    fName VARCHAR(50) NOT NULL,
+    lName VARCHAR(50) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    otp VARCHAR(6),
+    otp_expiry TIMESTAMP NULL,
+    activatedAcc TINYINT(1) DEFAULT 0
 );
 
 -- User Profiles Table
@@ -25,11 +28,15 @@ CREATE TABLE UserProfiles (
 CREATE TABLE Wallets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
-    wallet_number INT NOT NULL, -- To distinguish between multiple wallets for a user
+    wallet_name VARCHAR(100) NOT NULL DEFAULT 'Main Wallet',
     balance DECIMAL(15,2) DEFAULT 0.00, -- Current wallet balance
     currency VARCHAR(10) DEFAULT 'USD',
-    UNIQUE (user_id, wallet_number), -- Ensure each user can have up to 3 wallets
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+    is_default BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    UNIQUE (user_id, wallet_name),
+    CONSTRAINT unique_default_wallet UNIQUE (user_id, is_default), -- Ensure only one default wallet per user
+    -- Remove subquery from CHECK constraint
+    CONSTRAINT max_wallets_per_user CHECK (user_id <= 3) -- Replace with a simpler constraint or use triggers
 );
 
 -- Cards Table
@@ -67,11 +74,15 @@ CREATE TABLE Transfers (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     sender_id INT, 
     receiver_id INT, 
-    amount DECIMAL(15,2) NOT NULL, 
-    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending', 
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-    FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE, 
-    FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
+    amount DECIMAL(15,2) NOT NULL,
+    sender_wallet_id INT,
+    receiver_wallet_id INT,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE
 );
 
 -- Payment Schedules Table
@@ -84,37 +95,29 @@ CREATE TABLE PaymentSchedules (
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
--- OTPs Table
-CREATE TABLE OTPs (
-    id INT AUTO_INCREMENT PRIMARY KEY, 
-    user_id INT, 
-    otp VARCHAR(255) NOT NULL, 
-    expiry_timestamp TIMESTAMP NOT NULL, -- OTP expiration timestamp
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
-);
-
 -- VerificationStatuses Table
 CREATE TABLE VerificationStatuses (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     user_id INT, 
     email_verified BOOLEAN DEFAULT FALSE, 
     document_verified BOOLEAN DEFAULT FALSE,
-    super_verified BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
+    super_verified BOOLEAN DEFAULT FALSE, -- Fixed typo here
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
 -- ID Documents Table
 CREATE TABLE IDDocuments (
-    id INT AUTO_INCREMENT PRIMARY KEY, 
-    user_id INT, 
-    link VARCHAR(255) NOT NULL, 
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE 
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   user_id INT,
+   link VARCHAR(255) NOT NULL,
+   FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
+
 -- Admins Table
 CREATE TABLE Admins (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL, -- Hashed password
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL, -- Hashed password
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

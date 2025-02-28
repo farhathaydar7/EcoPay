@@ -34,12 +34,24 @@ try {
     $dob = $_POST['dob'] ?? null;
     $profilePicPath = null;
 
+    // Validate address and DOB
+    if ($address && strlen($address) > 255) {
+        throw new Exception('Address is too long.');
+    }
+    if ($dob && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
+        throw new Exception('Invalid date format. Use YYYY-MM-DD.');
+    }
+
     // Handle profile picture upload
     if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['profile_pic'];
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
         if (!in_array($file['type'], $allowedTypes)) {
             throw new Exception('Invalid profile picture type. Only JPG, PNG, and GIF are allowed.');
+        }
+        $maxFileSize = 2 * 1024 * 1024; // 2MB
+        if ($file['size'] > $maxFileSize) {
+            throw new Exception('Profile picture size exceeds the limit of 2MB.');
         }
         $uniqueName = uniqid('profile_pic_', true) . '-' . basename($file['name']);
         $profilePicPath = '/' . $uniqueName;
@@ -54,6 +66,10 @@ try {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
         if (!in_array($file['type'], $allowedTypes)) {
             throw new Exception('Invalid ID document type. Only JPG, PNG, GIF, and PDF are allowed.');
+        }
+         $maxFileSize = 5 * 1024 * 1024; // 5MB
+        if ($file['size'] > $maxFileSize) {
+            throw new Exception('ID document size exceeds the limit of 5MB.');
         }
         $uniqueName = uniqid('id_doc_', true) . '-' . basename($file['name']);
         $idDocumentLink = '/' . $uniqueName;
@@ -76,11 +92,26 @@ try {
     $stmt->execute([$userId, $address, $dob, $profilePicPath]);
 
     // Fetch updated user data **only once**
+    // Fetch updated user data **only once**
     $stmt = $pdo->prepare("
-        SELECT Users.name, Users.email, Wallets.balance
-        FROM Users
-        INNER JOIN Wallets ON Users.id = Wallets.user_id
-        WHERE Users.id = ?
+    SELECT
+        Users.userName,
+        Users.fName,
+        Users.lName,
+        Users.email,
+        UserProfiles.address,
+        UserProfiles.dob,
+        UserProfiles.profile_pic,
+        VerificationStatuses.document_verified,
+        VerificationStatuses.super_verified
+    FROM
+        Users
+    LEFT JOIN
+        UserProfiles ON Users.id = UserProfiles.user_id
+    LEFT JOIN
+        VerificationStatuses ON Users.id = VerificationStatuses.user_id
+    WHERE
+        Users.id = ?
     ");
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -88,7 +119,7 @@ try {
     $response_data = [
         'status' => 'success',
         'message' => 'Profile updated successfully.',
-        'user' => $user
+        'user' => $user,
     ];
 
 } catch (Exception $e) {

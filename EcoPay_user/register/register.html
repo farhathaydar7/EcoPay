@@ -7,26 +7,46 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
     <div class="register-container">
         <h2>Register</h2>
         <form id="register-form">
             <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="fullName" required>
+                <label for="userName">Username:</label>
+                <input type="text" id="userName" name="userName" required>
+            </div>
+            <div class="form-group">
+                <label for="fName">First Name:</label>
+                <input type="text" id="fName" name="fName" required>
+            </div>
+            <div class="form-group">
+                <label for="lName">Last Name:</label>
+                <input type="text" id="lName" name="lName" required>
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
-                <label for="phone">Phone:</label>
-                <input type="tel" id="phone" name="phone" required>
-            </div>
-            <div class="form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" id="register-button">Register</button>
+             <div class="form-group" id="otp-group" style="display: none;">
+                <label for="otp">OTP:</label>
+                <input type="text" id="otp" name="otp">
+                <button type="button" id="verify-otp-button">Verify OTP</button>
+                <button type="button" id="resend-otp-button">Resend OTP</button>
+            </div>
+            <input type="hidden" id="userEmail" name="userEmail">
             <div id="message"></div>
         </form>
         <p>Already registered? <a href="../login/login.html">Login here</a></p>

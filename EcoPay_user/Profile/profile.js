@@ -7,45 +7,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const dobInput = document.getElementById('dob');
     const profilePicInput = document.getElementById('profile_pic');
     const idDocumentInput = document.getElementById('id_document');
+    const idDocumentContainer = document.getElementById('id-document-container');
+    const idDocumentDisplay = document.getElementById('id-document-display');
+    const profilePicDisplay = document.getElementById('profile-pic-display');
+
+    // Function to display ID Document
+    function displayIdDocument(idDocumentLink) {
+        if (idDocumentLink) {
+            const fileExtension = idDocumentLink.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+                idDocumentDisplay.innerHTML = `<img src="../../uploads/${idDocumentLink}" alt="Uploaded ID" style="max-width: 200px; display: block;">`;
+            } else if (fileExtension === 'pdf') {
+                idDocumentDisplay.innerHTML = `<a href="../../uploads/${idDocumentLink}" target="_blank">View Uploaded ID (PDF)</a>`;
+            }
+            idDocumentInput.disabled = true; // Disable input after upload
+        } else {
+            // No document: show input field
+            idDocumentDisplay.innerHTML = '';
+            idDocumentInput.disabled = false; // Enable input if no document
+        }
+    }
 
     // Fetch user profile data on page load
     axios.get('../../EcoPay_backend/profile.php')
         .then(response => {
             if (response.data.status === 'success') {
                 const userData = response.data.user;
-                nameInput.value = userData.name;
+
+                // Set name and email at the top (Non-editable)
+                nameInput.value = `${userData.fName} ${userData.lName}`;
                 emailInput.value = userData.email;
                 addressInput.value = userData.address || '';
                 dobInput.value = userData.dob || '';
 
-                // Fetch and display profile picture
-                axios.get('../../EcoPay_backend/get_pfp.php')
-                    .then(pfpResponse => {
-                        if (pfpResponse.data.status === 'success' && pfpResponse.data.profile_pic_path) {
-                            const profilePic = document.getElementById('profile-pic-display');
-                            profilePic.src = '../../uploads' + pfpResponse.data.profile_pic_path;
-                            profilePic.style.display = 'block';
+                // Profile Picture (Non-Editable)
+                if (userData.profile_pic) {
+                    profilePicDisplay.src = `../../uploads/${userData.profile_pic}`;
+                    profilePicDisplay.style.display = 'block';
+                } else {
+                    profilePicDisplay.style.display = 'none';
+                }
+
+                // ID Document (Like Profile Picture)
+                axios.get('../../EcoPay_backend/get_id_doc.php')
+                    .then(response => {
+                        if (response.data.status === 'success') {
+                            const idDocumentLink = response.data.id_document;
+                            displayIdDocument(idDocumentLink);
                         } else {
-                            document.getElementById('profile-pic-display').style.display = 'none';
+                            console.error('Error fetching ID document:', response.data.message);
+                            messageDiv.textContent = 'Error loading ID document: ' + response.data.message;
+                            messageDiv.classList.add('error');
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching profile picture:', error);
+                        console.error('Error fetching ID document:', error);
+                        messageDiv.textContent = 'Failed to fetch ID document.';
+                        messageDiv.classList.add('error');
                     });
-
-                // Check and display document verification status (rest of your code)
-                const idDocumentInput = document.getElementById('id_document');
-                if (userData.document_verified === 1) {
-                    messageDiv.textContent = 'ID Document Verified.';
-                    messageDiv.classList.add('success');
-                    idDocumentInput.disabled = true;
-                } else if (userData.document_verified === 0) {
-                    messageDiv.textContent = 'ID Document Pending Verification.';
-                    messageDiv.classList.add('error'); // Or use a different class like 'warning'
-                    idDocumentInput.disabled = true; // Disable file input if pending
-                } else {
-                    idDocumentInput.disabled = false; // Enable if no verification status
-                }
 
             } else {
                 messageDiv.textContent = 'Error loading profile: ' + response.data.message;
@@ -58,14 +77,25 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.classList.add('error');
         });
 
+    // Form Submission with DOB Validation (Must be over 18)
     profileForm.addEventListener('submit', function(event) {
         event.preventDefault();
         messageDiv.textContent = '';
-        messageDiv.classList.remove('success', 'error');
+        messageDiv.classList.remove('success', 'error', 'warning');
+
+        // Validate DOB (User must be over 18)
+        const dob = new Date(dobInput.value);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (age < 18 || (age === 18 && monthDiff < 0)) {
+            messageDiv.textContent = 'You must be at least 18 years old.';
+            messageDiv.classList.add('error');
+            return;
+        }
 
         const formData = new FormData(profileForm);
 
-        // Send profile update data (POST request to update_profile.php)
         axios.post('../../EcoPay_backend/update_profile.php', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -76,12 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.textContent = response.data.message;
                 messageDiv.classList.add('success');
 
-                // Update displayed user info after successful update
-                const user = response.data.user;
-                nameInput.value = user.name;
-                emailInput.value = user.email;
-                addressInput.value = user.address || '';
-                dobInput.value = user.dob || '';
+                // Refresh Document Display
+                axios.get('../../EcoPay_backend/get_id_doc.php')
+                    .then(response => {
+                        if (response.data.status === 'success') {
+                            const idDocumentLink = response.data.id_document;
+                            displayIdDocument(idDocumentLink);
+                        } else {
+                            console.error('Error fetching ID document:', response.data.message);
+                            messageDiv.textContent = 'Error loading ID document: ' + response.data.message;
+                            messageDiv.classList.add('error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching ID document:', error);
+                        messageDiv.textContent = 'Failed to fetch ID document.';
+                        messageDiv.classList.add('error');
+                    });
 
             } else {
                 messageDiv.textContent = response.data.message;
@@ -101,13 +142,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editProfileBtn.addEventListener('click', function() {
         editableInputs.forEach(input => {
-            input.removeAttribute('readonly');
+            if (input !== profilePicInput) { // Prevent profile pic change
+                input.removeAttribute('readonly');
+            }
         });
         editProfileBtn.style.display = 'none';
         saveProfileBtn.style.display = 'block';
     });
 
     saveProfileBtn.addEventListener('click', function() {
-        profileForm.requestSubmit(); // Programmatically submit the form
+        profileForm.requestSubmit(); // Submit form programmatically
     });
 });

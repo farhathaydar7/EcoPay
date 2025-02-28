@@ -20,10 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await axios.post('../../EcoPay_backend/login.php', formData);
 
-            messageDiv.textContent = response.data;
-            if (response.data.includes('Login successful')) {
-                // Redirect to dashboard after successful login
+            if (response.data.status === 'success') {
+                messageDiv.textContent = response.data.message;
+                const user = response.data.user;
+                localStorage.setItem('user', JSON.stringify(user));
                 window.location.href = '../dashboard/dashboard.html';
+            } else {
+                messageDiv.textContent = response.data.message;
             }
         } catch (error) {
             console.error('Login failed:', error);
