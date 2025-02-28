@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = '../../EcoPay_backend/';
     const loginForm = document.getElementById('login-form');
     const messageDiv = document.getElementById('message');
 
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('email', email);
             formData.append('password', password);
 
-            const response = await axios.post('../../EcoPay_backend/login.php', formData);
+            const response = await axios.post(API_BASE_URL + 'login.php', formData);
 
             if (response.data.status === 'success') {
                 messageDiv.textContent = response.data.message;

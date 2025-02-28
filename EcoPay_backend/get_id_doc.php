@@ -9,14 +9,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Database connection details
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "project_ecopay";
+require_once 'config.php';
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($host, $username, $password, $dbName);
 
 // Check connection
 if ($conn->connect_error) {

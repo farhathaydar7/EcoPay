@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = '../../EcoPay_backend/';
     const registerForm = document.getElementById('register-form');
     const messageDiv = document.getElementById('message');
     const registerButton = document.getElementById('register-button');
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 password: password
             };
 
-            const response = await axios.post('../../EcoPay_backend/register.php', userData, {
+            const response = await axios.post(API_BASE_URL + 'register.php', userData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -81,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: email
             };
 
-            const response = await axios.post('../../EcoPay_backend/verify_otp.php', otpData, {
+            const response = await axios.post(API_BASE_URL + 'verify_otp.php', otpData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: email
             };
 
-            const response = await axios.post('../../EcoPay_backend/email_verify.php', resendData, {
+            const response = await axios.post(API_BASE_URL + 'email_verify.php', resendData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }

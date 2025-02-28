@@ -85,12 +85,12 @@ try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'haydarfarhat70pubg@gmail.com'; 
-    $mail->Password   = 'bfsmnvmzjnqqwfin'; 
+    $mail->Username   = $smtpUsername;
+    $mail->Password   = $smtpPassword;
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
 
-    $mail->setFrom('haydarfarhat70pubg@gmail.com', 'EcoPay');
+    $mail->setFrom($smtpUsername, 'EcoPay');
     $mail->addAddress($email, "$fname $lname");
     $mail->isHTML(true);
     $mail->Subject = 'Your EcoPay OTP';
