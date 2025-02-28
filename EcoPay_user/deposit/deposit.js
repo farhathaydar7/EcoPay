@@ -1,8 +1,6 @@
-    const API_BASE_URL = '../../EcoPay_backend/';
 async function fetchWallets() {
-    const mockUserId = document.getElementById('mock_user_id').value;
     try {
-        const response = await axios.get(API_BASE_URL + 'get_wallets.php');
+        const response = await axios.get('../../EcoPay_backend/get_wallets.php');
         
         if (response.data.status === 'success') {
             const walletSelect = document.getElementById('wallet');
@@ -25,7 +23,6 @@ async function deposit() {
     const walletId = document.getElementById('wallet').value;
     const amount = document.getElementById('amount').value;
     const messageDiv = document.getElementById('message');
-    const mockUserId = document.getElementById('mock_user_id').value; // Mock user ID
 
     messageDiv.textContent = ''; // Clear previous messages
 
@@ -41,7 +38,7 @@ async function deposit() {
 
     try {
       // First, check if the user is super verified
-      const profileResponse = await axios.get(API_BASE_URL + 'profile.php');
+      const profileResponse = await axios.get('../../EcoPay_backend/profile.php');
 
       if (profileResponse.data.status !== 'success') {
           messageDiv.textContent = profileResponse.data.message;
@@ -53,7 +50,7 @@ async function deposit() {
           return;
       }
 
-        const depositResponse = await axios.post(API_BASE_URL + 'deposit.php', 
+        const depositResponse = await axios.post('../../EcoPay_backend/deposit.php', 
             new URLSearchParams({
                 wallet_id: walletId,
                 amount: amount

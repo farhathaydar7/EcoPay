@@ -73,27 +73,19 @@ try {
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$newSenderBalance, $senderWalletId, $senderId]);
 
-    // Allow sender to also specify receiver's wallet
-    $receiverWalletId = $_POST["receiver_wallet_id"];
-
-    if (empty($receiverWalletId) || !is_numeric($receiverWalletId)) {
-      echo "Invalid receiver wallet ID.";
-      $pdo->rollBack();
-      exit;
-    }
-
-    // --- Check Receiver Wallet ---
-    $stmt = $pdo->prepare("SELECT id FROM Wallets WHERE id = ? AND user_id = ?");
-    $stmt->execute([$receiverWalletId, $receiverId]);
+    // --- Get Receiver's Default Wallet ---
+    $stmt = $pdo->prepare("SELECT id FROM Wallets WHERE user_id = ? AND is_default = TRUE");
+    $stmt->execute([$receiverId]);
     $receiverWallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$receiverWallet) {
-        echo "Receiver wallet not found or does not belong to receiver.";
+        echo "Receiver's default wallet not found.";
         $pdo->rollBack();
         exit;
     }
+    $receiverWalletId = $receiverWallet["id"];
 
-    // --- Transfer to receiver's specified wallet ---
+    // --- Transfer to receiver's default wallet ---
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$amount, $receiverWalletId, $receiverId]);
 

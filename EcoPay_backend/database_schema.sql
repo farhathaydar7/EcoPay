@@ -62,7 +62,7 @@ CREATE TABLE BorrowedCards (
 CREATE TABLE Transactions (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     user_id INT, 
-    type ENUM('deposit', 'withdraw', 'transfer') NOT NULL, 
+    type ENUM('deposit', 'withdraw', 'transfer', 'payment') NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 

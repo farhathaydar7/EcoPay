@@ -17,11 +17,25 @@ if (!isSuperVerified($pdo, $userId)) {
 
 try {
     // --- Fetch  History ---
-    $stmt = $pdo->prepare("SELECT * FROM Transactions WHERE user_id = ? ORDER BY timestamp DESC");
+    // Fetch transaction history
+    $stmt = $pdo->prepare("SELECT id, type, amount, status, timestamp FROM Transactions WHERE user_id = ? ORDER BY timestamp DESC");
     $stmt->execute([$userId]);
     $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (empty($transactions)) {
+    // Fetch scheduled payments
+    $stmt = $pdo->prepare("SELECT id, amount, next_execution as timestamp, 'scheduled' as type, 'pending' as status FROM PaymentSchedules WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $scheduledPayments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Merge transactions and scheduled payments
+    $allTransactions = array_merge($transactions, $scheduledPayments);
+
+    // Sort by timestamp (newest first)
+    usort($allTransactions, function($a, $b) {
+        return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+    });
+
+    if (empty($allTransactions)) {
         echo "No transaction history found.";
         exit;
     }
@@ -50,7 +64,7 @@ try {
         $html = '<h1>Transaction History</h1>';
         $html .= '<p>User ID: ' . $userId . '</p>';
         $html .= '<table border="1" cellpadding="5">';
-        $html .= '<thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Status</th><th>Timestamp</th></tr></thead><tbody>';
+            $html .= '<thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Status</th><th>Timestamp</th></tr></thead><tbody>';
 
         foreach ($transactions as $transaction) {
             $html .= '<tr>';

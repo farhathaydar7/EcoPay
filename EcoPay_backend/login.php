@@ -38,7 +38,7 @@ try {
                 'message' => 'Login successful!',
                 'user' => [
                     'id' => $user['id'],
-                    'userName' => $user['userName'],
+                    'userName' => isset($user['userName']) ? $user['userName'] : null,
                     'fName' => $user['fName'],
                     'lName' => $user['lName'],
                     'email' => $user['email']
