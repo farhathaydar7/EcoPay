@@ -133,14 +133,10 @@ try {
     $transactionId = $pdo->lastInsertId();
     
     // --- Record P2P Transfer ---
-    $stmt = $pdo->prepare("INSERT INTO P2P_Transfers (transaction_id, sender_id, receiver_id, type) VALUES (?, ?, ?, 'p2p')");
+    $stmt = $pdo->prepare("INSERT INTO P2P_Transfers (transaction_id, sender_id, receiver_id) VALUES (?, ?, ?)");
     $stmt->execute([$transactionId, $senderId, $receiverId]);
     $p2pTransferId = $pdo->lastInsertId();
     
-    // Generate Unique Transaction Code
-    $transactionCode = "P2P-" . crc32($transactionId . $senderId . $receiverId);
-    $stmt = $pdo->prepare("UPDATE P2P_Transfers SET transaction_code = ? WHERE id = ?");
-    $stmt->execute([$transactionCode, $p2pTransferId]);
 
     if ($transactionId) {
         $pdo->commit();
