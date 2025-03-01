@@ -62,7 +62,7 @@ CREATE TABLE Transactions (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     user_id INT NOT NULL, 
     wallet_id INT NOT NULL, -- New column
-    type ENUM('deposit', 'withdraw', 'transfer', 'payment') NOT NULL,
+    type ENUM('deposit', 'withdraw', 'transfer', 'payment','p2p','rp') NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
@@ -134,12 +134,3 @@ CREATE TABLE P2P_Transfers (
     FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
--- Indexes for Optimization
-CREATE INDEX idx_users_email ON Users(email);
-CREATE INDEX idx_wallets_user ON Wallets(user_id);
-CREATE INDEX idx_transactions_user ON Transactions(user_id);
-CREATE INDEX idx_transactions_wallet ON Transactions(wallet_id);
-CREATE INDEX idx_transfers_sender ON Transfers(sender_id);
-CREATE INDEX idx_transfers_receiver ON Transfers(receiver_id);
-CREATE INDEX idx_p2p_sender ON P2P_Transfers(sender_id);
-CREATE INDEX idx_p2p_receiver ON P2P_Transfers(receiver_id);
