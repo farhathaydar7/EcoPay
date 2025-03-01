@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const walletsContainer = document.getElementById('user-wallets'); // Container for wallets
 
     // Fetch user info
-    axios.get('../../EcoPay_backend/profile.php')
+    axios.get('../../EcoPay_backend/V2/profile.php')
         .then(response => {
             if (response.data && response.data.user) {
                 const userData = response.data.user;
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Fetch user wallets
-    axios.get('../../EcoPay_backend/get_wallets.php')
+    axios.get('../../EcoPay_backend/V2/get_wallets.php')
         .then(response => {
             if (response.data && response.data.wallets) {
                 const walletsData = response.data.wallets;

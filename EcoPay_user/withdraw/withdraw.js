@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Call the withdraw API
         try {
-            const response = await fetch('../../EcoPay_backend/withdraw.php', {
+            const response = await fetch('../../EcoPay_backend/V2/withdraw.php', {
                 method: 'POST',
                 body: data,
                 headers: {

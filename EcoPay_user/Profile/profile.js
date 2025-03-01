@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch user profile data on page load
-    axios.get('../../EcoPay_backend/profile.php')
+    axios.get('../../EcoPay_backend/V2/profile.php')
         .then(response => {
             if (response.data.status === 'success') {
                 const userData = response.data.user;
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // ID Document (Like Profile Picture)
-                axios.get('../../EcoPay_backend/get_id_doc.php')
+                axios.get('../../EcoPay_backend/V2/get_id_doc.php')
                     .then(response => {
                         if (response.data.status === 'success') {
                             const idDocumentLink = response.data.id_document;
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData(profileForm);
 
-        axios.post('../../EcoPay_backend/update_profile.php', formData, {
+        axios.post('../../EcoPay_backend/V2/update_profile.php', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.classList.add('success');
 
                 // Refresh Document Display
-                axios.get('../../EcoPay_backend/get_id_doc.php')
+                axios.get('../../EcoPay_backend/V2/get_id_doc.php')
                     .then(response => {
                         if (response.data.status === 'success') {
                             const idDocumentLink = response.data.id_document;

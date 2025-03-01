@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('email', email);
             formData.append('password', password);
 
-            const response = await axios.post('../../EcoPay_backend/login.php', formData);
+            const response = await axios.post('../../EcoPay_backend/V2/login.php', formData);
 
             if (response.data.status === 'success') {
                 messageDiv.textContent = response.data.message;

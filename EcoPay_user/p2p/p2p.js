@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch wallets and populate the select element
     async function populateWallets() {
         try {
-            const response = await axios.get('../../EcoPay_backend/get_wallets.php');
+            const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
             if (response.data.status === 'success' && response.data.wallets) {
                 response.data.wallets.forEach(wallet => {
                     const option = document.createElement('option');
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = document.getElementById('amount').value;
 
         try {
-            const response = await axios.post('../../EcoPay_backend/p2p_transfer.php', {
+            const response = await axios.post('../../EcoPay_backend/V2/p2p_transfer.php', {
                 receiver_identifier: receiverEmail,
                 sender_wallet_id: senderWalletId,
                 amount: amount

@@ -38,7 +38,7 @@ async function deposit() {
 
     try {
       // First, check if the user is super verified
-      const profileResponse = await axios.get('../../EcoPay_backend/profile.php');
+      const profileResponse = await axios.get('../../EcoPay_backend/V2/profile.php');
 
       if (profileResponse.data.status !== 'success') {
           messageDiv.textContent = profileResponse.data.message;
@@ -50,7 +50,7 @@ async function deposit() {
           return;
       }
 
-        const depositResponse = await axios.post('../../EcoPay_backend/deposit.php', 
+        const depositResponse = await axios.post('../../EcoPay_backend/V2/deposit.php', 
             new URLSearchParams({
                 wallet_id: walletId,
                 amount: amount
