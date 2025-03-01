@@ -1,61 +1,33 @@
 <?php
+header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Headers: Content-Type");
+
 require_once 'db_connection.php';
-require_once 'TransactionHistory.php';
 
-session_start();
+session_start(); // Start session if using authentication
 
-if (!isset($_SESSION["user_id"])) {
-    echo "User not logged in.";
+// Check for user_id from session (recommended) or GET request (fallback)
+$user_id = $_SESSION['user_id'] ?? $_GET['user_id'] ?? null;
+
+if (!$user_id) {
+    echo json_encode(["error" => "User ID is required"], JSON_PRETTY_PRINT);
     exit;
 }
 
-$userId = $_SESSION["user_id"];
+$query = "SELECT p2p.transaction_id, p2p.sender_id, p2p.receiver_id, 
+                 t.type, t.amount, t.status, t.timestamp, 
+                 u.fName, u.lName, u.email AS sender_email
+          FROM P2P_Transfers p2p
+          JOIN Transactions t ON p2p.transaction_id = t.id
+          JOIN Users u ON p2p.sender_id = u.id
+          WHERE p2p.receiver_id = ?";
 
-// Super Verification Check
+$stmt = $pdo->prepare($query);
+$stmt->execute([$user_id]);
+$receivedP2pTransactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-try {
-    // --- Fetch  History ---
-    $transactions = TransactionHistory::getByUserId($userId, $pdo);
-
-    if (empty($transactions)) {
-        echo json_encode([]);
-        exit;
-    }
-
-    $receivedP2pTransactions = [];
-    foreach ($transactions as $transaction) {
-        if ($transaction->type === 'transfer' || $transaction->type === 'p2p') {
-            $stmtP2P = $pdo->prepare("SELECT sender_id, receiver_id FROM P2P_Transfers WHERE transaction_id = ?");
-            $stmtP2P->execute([$transaction->id]);
-            $p2pTransfer = $stmtP2P->fetch(PDO::FETCH_ASSOC);
-
-            if ($p2pTransfer && $p2pTransfer['receiver_id'] == $userId) {
-                $transactionData = [
-                    'id' => $transaction->id,
-                    'type' => $transaction->type,
-                    'amount' => $transaction->amount,
-                    'status' => $transaction->status,
-                    'timestamp' => $transaction->timestamp,
-                    'receiver' => 'Unknown',
-                    'receiver_email' => 'Unknown'
-                ];
-
-                // Fetch receiver's name
-                $stmt = $pdo->prepare("SELECT fName, lName, email FROM Users WHERE id = ?");
-                $stmt->execute([$transaction->receiver_id]);
-                $receiver = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($receiver) {
-                    $transactionData['receiver'] = $receiver['fName'] . ' ' . $receiver['lName'];
-                    $transactionData['receiver_email'] = $receiver['email'];
-                }
-                $receivedP2pTransactions[] = $transactionData;
-            }
-        }
-    }
-
-    echo json_encode($receivedP2pTransactions);
-
-} catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage();
-}
-?>
+// Return JSON response
+echo json_encode($receivedP2pTransactions, JSON_PRETTY_PRINT);
+exit;

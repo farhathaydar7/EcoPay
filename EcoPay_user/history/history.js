@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 axios.get('../../EcoPay_backend/V2/transactions_history_sent_p2p.php')
             ]);
 
+            console.log("Received P2P Response:", receivedP2pResponse.data);
+
             if (regularResponse.data) {
                 regularResponse.data.forEach(transaction => {
                     const row = document.createElement('tr');
@@ -29,18 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            if (receivedP2pResponse.data) {
+            if (Array.isArray(receivedP2pResponse.data) && receivedP2pResponse.data.length > 0) {
                 receivedP2pResponse.data.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${transaction.type} from ${transaction.receiver}</td>
+                        <td>${transaction.type} from ${transaction.fName} ${transaction.lName}</td>
                         <td>${transaction.amount}</td>
                         <td>${transaction.status}</td>
                         <td>${transaction.timestamp}</td>
-                        <td>(${transaction.receiver_email})</td>
+                        <td>(${transaction.sender_email})</td>
                     `;
                     receivedP2pTransactionTableBody.appendChild(row);
                 });
+            } else {
+                console.warn("No received P2P transactions found:", receivedP2pResponse.data);
             }
 
             if (Array.isArray(sentP2pResponse.data)) {

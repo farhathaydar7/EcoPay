@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const p2pForm = document.getElementById('p2pForm');
     const messageDiv = document.getElementById('message');
     const senderWalletSelect = document.getElementById('sender_wallet_id');
+    const receivedP2pTransactionTableBody = document.getElementById('receivedP2pTransactionTableBody');
 
     // Fetch wallets and populate the select element
     async function populateWallets() {
@@ -65,4 +66,33 @@ document.addEventListener('DOMContentLoaded', function() {
             messageDiv.className = 'message error';
         }
     });
+
+    // Fetch and display received P2P transactions
+    async function fetchReceivedP2pTransactions() {
+        try {
+            const response = await axios.get('../../EcoPay_backend/V2/transactions_history_received_p2p.php');
+            const receivedP2pResponse = response.data;
+            console.log('Received P2P transactions:', receivedP2pResponse);
+
+            if (Array.isArray(receivedP2pResponse.data)) {
+                receivedP2pResponse.data.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${transaction.type} from ${transaction.sender}</td>
+                        <td>${transaction.amount}</td>
+                        <td>${transaction.status}</td>
+                        <td>${transaction.timestamp}</td>
+                        <td>(${transaction.sender_email})</td>
+                    `;
+                    receivedP2pTransactionTableBody.appendChild(row);
+                });
+            } else {
+                console.error('receivedP2pResponse.data is not an array:', receivedP2pResponse.data);
+            }
+        } catch (error) {
+            console.error('Error fetching received P2P transactions:', error);
+        }
+    }
+
+    fetchReceivedP2pTransactions();
 });
