@@ -34,9 +34,10 @@ CREATE TABLE Wallets (
     currency VARCHAR(10) DEFAULT 'USD',
     is_default BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
-    UNIQUE (user_id, wallet_name),
-    CONSTRAINT unique_default_wallet UNIQUE (user_id, is_default) -- Ensure only one default wallet per user
+    UNIQUE (user_id, wallet_name)
 );
+
+CREATE UNIQUE INDEX idx_user_default_wallet ON Wallets (user_id, is_default) WHERE is_default = 1;
 
 -- Cards Table
 CREATE TABLE Cards (
@@ -133,4 +134,3 @@ CREATE TABLE P2P_Transfers (
     FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
 );
-
