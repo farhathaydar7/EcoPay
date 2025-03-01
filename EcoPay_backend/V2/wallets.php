@@ -15,16 +15,26 @@ class Wallet {
 
     public function setDefaultWallet($userId, $walletId) {
         try {
+            // Begin transaction
+            $this->pdo->beginTransaction();
+
+            // Set all wallets to not default
+            $stmt = $this->pdo->prepare("UPDATE Wallets SET is_default = 0 WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
             // Set the selected wallet to default
             $stmt = $this->pdo->prepare("UPDATE Wallets SET is_default = 1 WHERE id = ? AND user_id = ?");
             $stmt->execute([$walletId, $userId]);
 
             if ($stmt->rowCount() > 0) {
+                $this->pdo->commit();
                 return ['success' => true, 'message' => 'Default wallet updated successfully'];
             } else {
+                $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Failed to update default wallet'];
             }
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             error_log("setDefaultWallet error: " . $e->getMessage());
             return ['success' => false, 'message' => 'Error updating default wallet', 'error' => $e->getMessage()];
         }
@@ -62,6 +72,7 @@ class Wallet {
             $stmt->execute([$userId]);
             $isFirstWallet = ($stmt->fetchColumn() == 0);
 
+            // Check if wallet with the same name already exists for the user
             // Check if wallet with the same name already exists for the user
             $stmt = $this->pdo->prepare("SELECT id FROM Wallets WHERE user_id = ? AND wallet_name = ?");
             $stmt->execute([$userId, $walletName]);

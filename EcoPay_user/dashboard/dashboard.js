@@ -2,15 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const userNameSpan = document.getElementById('user-name');
     const userEmailSpan = document.getElementById('user-email');
-    const walletsContainer = document.getElementById('user-wallets'); // Container for wallets
+    const walletsContainer = document.getElementById('user-wallets');
     const walletsList = document.getElementById('wallets-list');
     const createWalletButton = document.getElementById('create-wallet-button');
-    const switchBalanceModal = document.getElementById('switchBalanceModal');
 
     let userId;
     let walletsData;
 
-    // Function to fetch user ID from the backend
     function fetchUserId() {
         return axios.get('../../EcoPay_backend/V2/get_user_id.php')
             .then(response => {
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Function to fetch and display user info
     function fetchUserInfo() {
         axios.get('../../EcoPay_backend/V2/profile.php')
             .then(response => {
@@ -45,26 +42,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Function to fetch and display user wallets
     function fetchUserWallets() {
         return axios.get('../../EcoPay_backend/V2/get_wallets.php')
             .then(response => {
                 if (response.data && response.data.wallets) {
                     walletsData = response.data.wallets;
-                    walletsList.innerHTML = ''; // Clear existing wallets
+                    walletsList.innerHTML = '';
 
                     walletsData.forEach(wallet => {
                         const walletDiv = document.createElement('div');
                         walletDiv.classList.add('wallet');
-                        walletDiv.innerHTML = `
-                            <p>Wallet Name: ${wallet.wallet_name}</p>
-                            <p>Balance: ${wallet.balance} ${wallet.currency}</p>
-                            <button class="delete-wallet-button" data-wallet-id="${wallet.wallet_id}">Delete</button>
-                            <button class="rename-wallet-button" data-wallet-id="${wallet.wallet_id}">Rename</button>
-                            <button class="set-default-wallet-button" data-wallet-id="${wallet.wallet_id}">Set Default</button>
-                            <button class="switch-balance-wallet-button" data-wallet-id="${wallet.wallet_id}">Switch Balance</button>
-                        `;
                         walletsList.appendChild(walletDiv);
+
+                        const walletName = document.createElement('p');
+                        walletName.textContent = `Wallet Name: ${wallet.wallet_name}`;
+                        walletDiv.appendChild(walletName);
+
+                        const walletBalance = document.createElement('p');
+                        walletBalance.textContent = `Balance: ${wallet.balance} ${wallet.currency}`;
+                        walletDiv.appendChild(walletBalance);
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.classList.add('delete-wallet-button');
+                        deleteButton.dataset.walletId = wallet.wallet_id;
+                        deleteButton.textContent = 'Delete';
+                        walletDiv.appendChild(deleteButton);
+
+                        const renameButton = document.createElement('button');
+                        renameButton.classList.add('rename-wallet-button');
+                        renameButton.dataset.walletId = wallet.wallet_id;
+                        renameButton.textContent = 'Rename';
+                        walletDiv.appendChild(renameButton);
+
+                        const setDefaultButton = document.createElement('button');
+                        setDefaultButton.classList.add('set-default-wallet-button');
+                        setDefaultButton.dataset.walletId = wallet.wallet_id;
+                        setDefaultButton.textContent = 'Set Default';
+                        walletDiv.appendChild(setDefaultButton);
+
+                        const switchBalanceButton = document.createElement('button');
+                        switchBalanceButton.classList.add('switch-balance-wallet-button');
+                        switchBalanceButton.dataset.walletId = wallet.wallet_id;
+                        switchBalanceButton.textContent = 'Switch Balance';
+                        walletDiv.appendChild(switchBalanceButton);
                     });
 
                     // Add event listeners for delete buttons
@@ -102,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 axios.post('../../EcoPay_backend/V2/wallets.php', {
                                     action: 'renameWallet',
                                     wallet_id: walletId,
-                                    new_wallet_name: newWalletName,
-                                    user_id: userId // Add user_id
+                                    new_name: newWalletName,
+                                    user_id: userId
                                 })
                                     .then(response => {
                                         if (response.data && response.data.success) {
@@ -128,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             axios.post('../../EcoPay_backend/V2/wallets.php', {
                                 action: 'setDefaultWallet',
                                 wallet_id: walletId,
-                                user_id: userId // Add user_id
+                                user_id: userId
                             })
                                 .then(response => {
                                     if (response.data && response.data.success) {
@@ -148,7 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
                      // Add event listeners for switch balance buttons
                      document.querySelectorAll('.switch-balance-wallet-button').forEach(button => {
                         button.addEventListener('click', (event) => {
+                            console.log("Switch balance button clicked"); // Add this line
                             const fromWalletId = event.target.dataset.walletId;
+
+                            // Show modal
+                            const switchBalanceModal = document.getElementById('switchBalanceModal');
+                            switchBalanceModal.style.display = 'block';
 
                             // Populate dropdown list of wallets
                             let dropdown = document.getElementById('toWalletId');
@@ -161,9 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                     dropdown.add(option);
                                 }
                             });
-
-                            // Show modal
-                            switchBalanceModal.style.display = 'block';
 
                             // Add event listener for submit button
                             document.getElementById('switchBalanceSubmit').addEventListener('click', () => {
@@ -199,8 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     });
 
-                } else {
-                    throw new Error("Wallets data not found in response.");
+                    if (walletsData.length <= 1) {
+                        document.querySelectorAll('.delete-wallet-button').forEach(button => {
+                            button.disabled = true;
+                            button.classList.add('disabled');
+                        });
+                        document.querySelectorAll('.switch-balance-wallet-button').forEach(button => {
+                            button.disabled = true;
+                            button.classList.add('disabled');
+                        });
+                    }
                 }
             })
             .catch(error => {
@@ -209,39 +239,32 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Initial fetch of user info and wallets
     fetchUserId()
         .then(() => {
             fetchUserInfo();
             fetchUserWallets()
-                .then(() => {
-                    // Now that walletsData is available, attach event listeners
-                    attachEventListeners();
-                });
         });
 
-    function attachEventListeners() {
-        // Create Wallet functionality
-        createWalletButton.addEventListener('click', () => {
-            let walletName = prompt('Enter wallet name:');
-            if (walletName) {
-                axios.post('../../EcoPay_backend/V2/wallets.php', {
-                    action: 'createWallet',
-                    wallet_name: walletName,
-                    user_id: userId
+    createWalletButton.addEventListener('click', () => {
+        let walletName = prompt('Enter wallet name:');
+        if (walletName) {
+            axios.post('../../EcoPay_backend/V2/wallets.php', {
+                action: 'createWallet',
+                wallet_name: walletName,
+                user_id: userId
+            })
+                .then(response => {
+                    if (response.data && response.data.success) {
+                        alert('Wallet created successfully!');
+                        fetchUserWallets();
+                    } else {
+                        alert('Failed to create wallet: ' + (response.data.message || 'Unknown error'));
+                    }
                 })
-                    .then(response => {
-                        if (response.data && response.data.success) {
-                            alert('Wallet created successfully!');
-                        } else {
-                            alert('Failed to create wallet: ' + (response.data.message || 'Unknown error'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error creating wallet:', error);
-                        alert('Could not create wallet. Please check the console for details.');
-                    });
-            }
-        });
-    }
+                .catch(error => {
+                    console.error('Error creating wallet:', error);
+                    alert('Could not create wallet. Please check the console for details.');
+                });
+        }
+    });
 });
