@@ -25,11 +25,15 @@ class Transaction {
             error_log("Transaction inserted: ID $transactionId");
 
             // If it's a P2P transaction, add to P2P_Transfers
-            if ($type === 'p2p' && $p2pData) {
-                $stmt = $this->pdo->prepare("INSERT INTO P2P_Transfers (transaction_id, sender_id, receiver_id) 
-                                             VALUES (?, ?, ?)");
-                $stmt->execute([$transactionId, $p2pData['sender_id'], $p2pData['receiver_id']]);
-                error_log("P2P Transfer recorded: transaction_id $transactionId, sender {$p2pData['sender_id']}, receiver {$p2pData['receiver_id']}");
+            if ($type === 'p2p' && is_array($p2pData)) {
+                if (isset($p2pData['sender_id']) && isset($p2pData['receiver_id']) && is_string($p2pData['sender_id']) && is_string($p2pData['receiver_id'])) {
+                    $stmt = $this->pdo->prepare("INSERT INTO P2P_Transfers (transaction_id, sender_id, receiver_id) 
+                                                 VALUES (?, ?, ?)");
+                    $stmt->execute([$transactionId, $p2pData['sender_id'], $p2pData['receiver_id']]);
+                    error_log("P2P Transfer recorded: transaction_id $transactionId, sender {$p2pData['sender_id']}, receiver {$p2pData['receiver_id']}");
+                } else {
+                    error_log("P2P data missing sender_id or receiver_id, or they are not strings.");
+                }
             }
 
             // Commit transaction
@@ -38,7 +42,7 @@ class Transaction {
 
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            error_log("Transaction failed: " . $e->getMessage());
+            error_log("Transaction failed: " . print_r($e->getMessage(), true));
             return ['success' => false, 'message' => 'Transaction failed', 'error' => $e->getMessage()];
         }
     }
@@ -49,3 +53,4 @@ class Transaction {
 //$response = $transaction->recordPayment(1, 1, 'deposit', 100.00);
 //echo json_encode($response);
 ?>
+class Transaction {

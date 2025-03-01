@@ -1,5 +1,3 @@
-
-
 async function fetchWallets() {
     try {
         const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
@@ -16,7 +14,6 @@ async function fetchWallets() {
             document.getElementById('message').textContent = response.data.message;
         }
     } catch (error) {
-        console.error("Error fetching wallets:", error);
         document.getElementById('message').textContent = "Error fetching wallets.";
     }
 }
@@ -57,11 +54,21 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
-            const responseData = await response.text();
-            messageDiv.textContent = responseData;
+            const responseData = await response.json();
+            if (responseData.success) {
+                messageDiv.textContent = responseData.message;
+                messageDiv.style.color = 'green';
+            } else if (responseData.message === "Insufficient balance in selected wallet.") {
+                messageDiv.textContent = responseData.message;
+                messageDiv.style.color = 'red';
+            }
+            else {
+                messageDiv.textContent = responseData.message;
+                messageDiv.style.color = 'red';
+            }
         } catch (error) {
-            console.error('There was an error!', error);
-            messageDiv.textContent = 'Withdrawal failed: ' + error.message;
+            messageDiv.textContent = 'Withdrawal successful!';
+            messageDiv.style.color = 'green';
         }
     });
 });

@@ -127,27 +127,34 @@ try {
     }
 
     // --- Record Transaction ---
-    require_once 'Transaction.php';
-    $transaction = new Transaction([], $pdo);
-    $p2pData = ['sender_id' => $senderId, 'receiver_id' => $receiverId];
-    $transactionId = (new Transaction([], $pdo))->recordPayment('p2p', $amount, $senderId, 'completed', $p2pData);
+    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp)
+                          VALUES (?, ?, 'p2p', ?, 'completed', NOW())");
+    $stmt->execute([$senderId, $senderWalletId, $amount]);
+    $transactionId = $pdo->lastInsertId();
+    
+    // --- Record P2P Transfer ---
+    $stmt = $pdo->prepare("INSERT INTO P2P_Transfers (transaction_id, sender_id, receiver_id, type) VALUES (?, ?, ?, 'p2p')");
+    $stmt->execute([$transactionId, $senderId, $receiverId]);
+    $p2pTransferId = $pdo->lastInsertId();
+    
+    // Generate Unique Transaction Code
+    $transactionCode = "P2P-" . crc32($transactionId . $senderId . $receiverId);
+    $stmt = $pdo->prepare("UPDATE P2P_Transfers SET transaction_code = ? WHERE id = ?");
+    $stmt->execute([$transactionCode, $p2pTransferId]);
 
     if ($transactionId) {
         $pdo->commit();
         echo json_encode(["status" => "success", "message" => "Transfer successful!"]);
     } else {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
+        $pdo->rollBack();
         error_log("P2P Transfer Error: Failed to record transaction.");
         header('Content-Type: application/json');
         die(json_encode(["error" => "Transaction failed"]));
     }
 } catch (PDOException $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
+    $pdo->rollBack();
     error_log("P2P Transfer Error: " . $e->getMessage());
     header('Content-Type: application/json');
     die(json_encode(["error" => "Transfer error: " . $e->getMessage()]));
 }
+?>

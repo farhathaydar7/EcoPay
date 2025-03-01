@@ -3,13 +3,13 @@ require_once 'db_connection.php';
 session_start();
 
 if (!isset($_SESSION["user_id"])) {
-    echo "User not logged in.";
+    echo json_encode(["success" => false, "message" => "User not logged in."]);
     exit;
     die();
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    echo "POST requests only.";
+    echo json_encode(["success" => false, "message" => "POST requests only."]);
     exit;
     die();
 }
@@ -22,7 +22,7 @@ $walletId = $_POST["wallet_id"];
 $amount = $_POST["amount"];
 
 if (empty($walletId) || !is_numeric($walletId) || empty($amount) || !is_numeric($amount) || $amount <= 0) {
-    echo "Invalid request parameters.";
+    echo json_encode(["success" => false, "message" => "Invalid request parameters."]);
     exit;
     die();
 }
@@ -38,7 +38,7 @@ try {
     $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$wallet) {
-        echo "Wallet not found or does not belong to user.";
+        echo json_encode(["success" => false, "message" => "Wallet not found or does not belong to user."]);
         exit;
         die();
     }
@@ -46,7 +46,7 @@ try {
     $currentBalance = $wallet["balance"];
 
     if ($currentBalance < $amount) {
-        echo "Insufficient balance in selected wallet.";
+        echo json_encode(["success" => false, "message" => "Insufficient balance in selected wallet."]);
         exit;
         die();
     }
@@ -58,26 +58,33 @@ try {
 
     if ($stmt->rowCount() == 0) {
         $pdo->rollBack();
-        echo "Wallet not found or does not belong to user.";
+        echo json_encode(["success" => false, "message" => "Wallet not found or does not belong to user."]);
         exit;
         die();
     }
 
     // Record transaction
-    require_once 'Transaction.php';
-    $transaction = new Transaction([], $pdo);
-    $transactionId = $transaction->recordPayment('withdraw', -$amount, $userId, 'completed');
+    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp) 
+                                         VALUES (?, ?, ?, ?, ?, NOW())");
+    $stmt->execute([$userId, $walletId, 'withdraw', -$amount, 'completed']);
+    $transactionId = $pdo->lastInsertId();
 
     if ($transactionId) {
         $pdo->commit();
-        echo "Withdrawal successful!";
+        echo json_encode([
+            "success" => true,
+            "message" => "Withdrawal successful!",
+            "transaction_id" => $transactionId
+        ]);
     } else {
         $pdo->rollBack();
-        echo "Withdrawal error: Failed to record transaction.";
+        echo json_encode(["success" => false, "message" => "Withdrawal error: Failed to record transaction."]);
     }
 
 } catch (PDOException $e) {
-    $pdo->rollBack();
-    echo "Withdrawal error: " . $e->getMessage();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    echo json_encode(["success" => false, "message" => "Withdrawal error: " . $e->getMessage()]);
 }
 ?>
