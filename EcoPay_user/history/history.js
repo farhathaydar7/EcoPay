@@ -15,8 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (regularResponse.data) {
                 regularResponse.data.forEach(transaction => {
                     const row = document.createElement('tr');
+                    let receiverInfo = '';
+                    if (transaction.receiver) {
+                        receiverInfo = ` from ${transaction.receiver}`;
+                    }
                     row.innerHTML = `
-                        <td>${transaction.type}</td>
+                        <td>${transaction.type}${receiverInfo}</td>
                         <td>${transaction.amount}</td>
                         <td>${transaction.status}</td>
                         <td>${transaction.timestamp}</td>
