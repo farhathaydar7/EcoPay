@@ -11,7 +11,41 @@
     <div class="container">
         <h1>Transaction History</h1>
         <div id="message" class="message" aria-live="polite">Loading transactions...</div>
-        <table id="transactionTable">
+
+        <h2>Sent P2P Transactions</h2>
+        <table id="sentP2pTransactionTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sent P2P Transactions will be displayed here -->
+            </tbody>
+        </table>
+
+        <h2>Received P2P Transactions</h2>
+        <table id="receivedP2pTransactionTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Received P2P Transactions will be displayed here -->
+            </tbody>
+        </table>
+
+        <h2>Other Transactions</h2>
+        <table id="otherTransactionTable">
             <thead>
                 <tr>
                     <th>Type</th>
@@ -21,7 +55,7 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Transactions will be displayed here -->
+                <!-- Other Transactions will be displayed here -->
             </tbody>
         </table>
     </div>
