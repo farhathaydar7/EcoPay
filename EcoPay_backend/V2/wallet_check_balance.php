@@ -16,10 +16,6 @@ if (!isset($walletId) || !is_numeric($walletId)) {
 }
 
 // Super Verification Check
-if (!isSuperVerified($pdo, $userId)) {
-    echo "User is not super verified.";
-    exit;
-}
 
 try {
     // --- Fetch Wallet Balance from the specified wallet ---

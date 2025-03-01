@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 password: password
             };
 
-            const response = await axios.post('../../Ecopay_backend/register.php', userData, {
+            const response = await axios.post('../../Ecopay_backend/V2/register.php', userData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: email
             };
 
-            const response = await axios.post('../../Ecopay_backend/verify_otp.php', otpData, {
+            const response = await axios.post('../../Ecopay_backend/V2/verify_otp.php', otpData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: email
             };
 
-            const response = await axios.post('../../Ecopay_backend/email_verify.php', resendData, {
+            const response = await axios.post('../../Ecopay_backend/V2/email_verify.php', resendData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }

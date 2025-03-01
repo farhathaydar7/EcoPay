@@ -61,6 +61,16 @@ class User {
         $stmt->execute([$this->userName, $this->fName, $this->lName, $this->email, $this->password, $this->otp, $this->otp_expiry, $this->activatedAcc, $this->id]);
         return $stmt->rowCount() > 0;
     }
+    
+    function isSuperVerified($pdo, $userId) {
+        error_log("V2 User.php: Checking if user {$userId} is super verified.");
+        $stmt = $pdo->prepare("SELECT is_super_verified FROM Users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $verificationStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        error_log("V2 User.php: is_super_verified: " . print_r($verificationStatus, true));
+        return !empty($verificationStatus) && $verificationStatus['is_super_verified'] == 1;
+    }
 
     // Delete
     public function delete() {

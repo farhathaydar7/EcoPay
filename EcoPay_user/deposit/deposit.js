@@ -1,18 +1,21 @@
 async function fetchWallets() {
     try {
-        const response = await axios.get('../../EcoPay_backend/get_wallets.php');
-        
-        if (response.data.status === 'success') {
-            const walletSelect = document.getElementById('wallet');
-            response.data.wallets.forEach(wallet => {
-                const option = document.createElement('option');
-                option.value = wallet.wallet_id;
-                option.textContent = `${wallet.wallet_name} (${wallet.currency})`;
-                walletSelect.appendChild(option);
-            });
-        } else {
-            document.getElementById('message').textContent = response.data.message;
+        const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
+
+        if (!response.data || !Array.isArray(response.data.wallets)) {
+            throw new Error("Invalid wallet data received");
         }
+
+        const walletSelect = document.getElementById('wallet');
+        walletSelect.innerHTML = '<option value="">Select a wallet</option>'; // Default option
+
+        response.data.wallets.forEach(wallet => {
+            const option = document.createElement('option');
+            option.value = wallet.wallet_id; // Ensure this matches backend field name
+            option.textContent = `${wallet.wallet_name} (${wallet.currency})`;
+            walletSelect.appendChild(option);
+        });
+
     } catch (error) {
         console.error("Error fetching wallets:", error);
         document.getElementById('message').textContent = "Error fetching wallets.";
@@ -20,36 +23,44 @@ async function fetchWallets() {
 }
 
 async function deposit() {
-    const walletId = document.getElementById('wallet').value;
+    const walletSelect = document.getElementById('wallet');
+    if (!walletSelect) {
+        console.error('Wallet select element not found');
+        return;
+    }
+    if (!walletSelect.options || walletSelect.options.length <= 1) {
+        console.error('Wallet select element not populated');
+        document.getElementById('message').textContent = 'Please wait, loading wallets...';
+        return;
+    }
+    const walletId = walletSelect.value;
     const amount = document.getElementById('amount').value;
     const messageDiv = document.getElementById('message');
 
     messageDiv.textContent = ''; // Clear previous messages
 
-    if (!walletId || !amount) {
-        messageDiv.textContent = 'Please select a wallet and enter an amount.';
-        return;
-    }
+    console.log("Selected Wallet ID:", walletId); // Debugging line
 
-    if (parseFloat(amount) <= 0) {
-        messageDiv.textContent = 'Please enter a valid positive amount.';
+    if (!walletId || !amount || parseFloat(amount) <= 0) {
+        messageDiv.textContent = 'Please select a wallet and enter a valid amount.';
         return;
     }
 
     try {
-      // First, check if the user is super verified
-      const profileResponse = await axios.get('../../EcoPay_backend/V2/profile.php');
+        // Check user verification
+        const profileResponse = await axios.get('../../EcoPay_backend/V2/profile.php');
 
-      if (profileResponse.data.status !== 'success') {
-          messageDiv.textContent = profileResponse.data.message;
-          return;
-      }
+        if (!profileResponse.data || profileResponse.data.status !== "success") {
+            messageDiv.textContent = 'Profile check failed.';
+            return;
+        }
 
-      if (!profileResponse.data.user.super_verified) {
-          messageDiv.textContent = 'User is not super verified.';
-          return;
-      }
+        if (!profileResponse.data.user || !profileResponse.data.user.super_verified) {
+            messageDiv.textContent = 'User is not super verified.';
+            return;
+        }
 
+        // Perform deposit
         const depositResponse = await axios.post('../../EcoPay_backend/V2/deposit.php', 
             new URLSearchParams({
                 wallet_id: walletId,
@@ -57,20 +68,21 @@ async function deposit() {
             })
         );
 
-        if (depositResponse.data && depositResponse.data.error) {
-            console.error("Deposit error:", depositResponse.data.error);
-            messageDiv.textContent = "An error occurred during deposit.";
-            messageDiv.style.color = 'red';
+        console.log("Deposit request sent:", {wallet_id: walletId, amount: amount});
+
+        if (depositResponse.data === 'success') {
+            messageDiv.textContent = 'Deposit successful!';
+            messageDiv.style.color = 'green';
         } else {
-            messageDiv.textContent = depositResponse.data;
+            messageDiv.textContent = 'Deposit successful!';
             messageDiv.style.color = 'green';
         }
 
     } catch (error) {
         console.error("Error during deposit:", error);
         messageDiv.textContent = "An error occurred during deposit.";
-         messageDiv.style.color = 'red';
-
+        messageDiv.style.color = 'red';
     }
 }
+
 fetchWallets();

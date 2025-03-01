@@ -2,7 +2,7 @@
 
 async function fetchWallets() {
     try {
-        const response = await axios.get('../../EcoPay_backend/get_wallets.php');
+        const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
         
         if (response.data.status === 'success') {
             const walletSelect = document.getElementById('wallet');

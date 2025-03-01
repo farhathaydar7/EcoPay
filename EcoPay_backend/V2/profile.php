@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 require_once 'db_connection.php';
 require_once 'User.php';
 require_once 'UserProfile.php';
+require_once 'VerificationStatus.php';
 
 session_start();
 
@@ -38,11 +39,15 @@ try {
             Users.email,
             UserProfiles.address,
             UserProfiles.dob,
-            UserProfiles.profile_pic
+            UserProfiles.profile_pic,
+            VerificationStatuses.document_verified,
+            VerificationStatuses.super_verified
         FROM
             Users
         LEFT JOIN
             UserProfiles ON Users.id = UserProfiles.user_id
+        LEFT JOIN
+            VerificationStatuses ON Users.id = VerificationStatuses.user_id
         WHERE
             Users.id = ?
     ");
@@ -67,6 +72,8 @@ try {
             'address' => $userProfile->address,
             'dob' => $userProfile->dob,
             'profile_pic' => $userProfile->profile_pic,
+            'document_verified' => $result['document_verified'],
+            'super_verified' => $result['super_verified'],
             'name' => $user->fName . ' ' . $user->lName
         ];
 
@@ -86,3 +93,4 @@ try {
     echo json_encode($response_data);
     exit;
 }
+?>

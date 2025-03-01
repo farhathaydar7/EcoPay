@@ -1,49 +1,49 @@
 <?php
+header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+
 require_once 'db_connection.php';
-session_start();
+require_once 'config.php'; // Ensure $pdo is initialized here
 
-if (!isset($_SESSION["user_id"])) {
-    echo "User not logged in.";
-    exit;
-}
-
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    echo "POST requests only.";
-    exit;
-}
-
-$senderId = $_SESSION["user_id"];
-
-// Super Verification Check
-if (!isSuperVerified($pdo, $senderId)) {
-    echo "User is not super verified.";
-    exit;
-}
-
+// Read and decode JSON input
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
-if (!$data) {
-    echo "Invalid JSON request.";
-    exit;
+// Debugging: Check if data is received properly
+if ($data === null) {
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "Invalid JSON format"]));
 }
 
-$receiverIdentifier = $data["receiver_identifier"] ?? null; // Should be email
+// Extract variables safely
+$receiverIdentifier = $data["receiver_identifier"] ?? null;
 $senderWalletId = $data["sender_wallet_id"] ?? null;
 $amount = $data["amount"] ?? null;
 
-if (
-    empty($receiverIdentifier) || 
-    empty($senderWalletId) || !is_numeric($senderWalletId) ||
-    empty($amount) || !is_numeric($amount) || $amount <= 0
-) {
-    echo "Invalid request parameters.";
-    exit;
+// Validate required fields
+if (!$receiverIdentifier) {
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "receiver_identifier is missing"]));
+}
+if (!$senderWalletId || !is_numeric($senderWalletId)) {
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "sender_wallet_id is missing or invalid"]));
+}
+if (!$amount || !is_numeric($amount) || $amount <= 0) {
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "amount is missing or invalid"]));
 }
 
-$amount = floatval($amount);
+// Check if $pdo is set
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "Database connection error"]));
+}
 
 try {
+    // Begin transaction
     $pdo->beginTransaction();
 
     // --- Resolve Receiver ID by Email ---
@@ -52,16 +52,34 @@ try {
     $receiverUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$receiverUser) {
-        echo "Receiver not found.";
-        $pdo->rollBack();
-        exit;
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Receiver not found"]));
     }
     $receiverId = $receiverUser["id"];
 
+    // --- Get Sender ID from senderWalletId ---
+    $stmt = $pdo->prepare("SELECT user_id FROM Wallets WHERE id = ?");
+    $stmt->execute([$senderWalletId]);
+    $senderWallet = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$senderWallet) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Sender wallet not found"]));
+    }
+    $senderId = $senderWallet["user_id"];
+
     if ($senderId == $receiverId) {
-        echo "Cannot transfer to yourself.";
-        $pdo->rollBack();
-        exit;
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Cannot transfer to yourself"]));
     }
 
     // --- Check Sender Balance ---
@@ -70,49 +88,66 @@ try {
     $senderWallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$senderWallet || $senderWallet["balance"] < $amount) {
-        echo "Insufficient balance in sender's wallet.";
-        $pdo->rollBack();
-        exit;
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Insufficient balance"]));
     }
 
-    // --- Update Balances ---
+    // --- Deduct from Sender ---
     $newSenderBalance = $senderWallet["balance"] - $amount;
-    // Transfer from sender's specified wallet
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$newSenderBalance, $senderWalletId, $senderId]);
 
     // --- Get Receiver's Default Wallet ---
-    $stmt = $pdo->prepare("SELECT id FROM Wallets WHERE user_id = ? AND is_default = TRUE");
+    $stmt = $pdo->prepare("SELECT id FROM Wallets WHERE user_id = ? AND is_default = 1");
     $stmt->execute([$receiverId]);
     $receiverWallet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$receiverWallet) {
-        echo "Receiver's default wallet not found.";
-        $pdo->rollBack();
-        exit;
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Receiver's default wallet not found"]));
     }
     $receiverWalletId = $receiverWallet["id"];
 
-    // --- Transfer to receiver's default wallet ---
+    // --- Transfer to Receiver ---
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = balance + ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$amount, $receiverWalletId, $receiverId]);
 
-    // Check if receiver wallet was updated
     if ($stmt->rowCount() == 0) {
-        $pdo->rollBack();
-        echo "Receiver wallet not found or does not belong to receiver.";
-        exit;
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Receiver wallet not found"]));
     }
 
-    // --- Record Transfer Details ---
-    $stmt = $pdo->prepare("INSERT INTO Transfers (sender_id, receiver_id, amount, sender_wallet_id, receiver_wallet_id, status) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$senderId, $receiverId, $amount, $senderWalletId, $receiverWalletId, 'completed']);
+    // --- Record Transaction ---
+    require_once 'Transaction.php';
+    $transaction = new Transaction([], $pdo);
+    $p2pData = ['sender_id' => $senderId, 'receiver_id' => $receiverId];
+    $transactionId = (new Transaction([], $pdo))->recordPayment('p2p', $amount, $senderId, 'completed', $p2pData);
 
-    $pdo->commit();
-    echo "Transfer successful!";
-
+    if ($transactionId) {
+        $pdo->commit();
+        echo json_encode(["status" => "success", "message" => "Transfer successful!"]);
+    } else {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("P2P Transfer Error: Failed to record transaction.");
+        header('Content-Type: application/json');
+        die(json_encode(["error" => "Transaction failed"]));
+    }
 } catch (PDOException $e) {
-    $pdo->rollBack();
-    echo "Transfer error: " . $e->getMessage();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log("P2P Transfer Error: " . $e->getMessage());
+    header('Content-Type: application/json');
+    die(json_encode(["error" => "Transfer error: " . $e->getMessage()]));
 }
-?>

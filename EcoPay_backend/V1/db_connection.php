@@ -10,10 +10,12 @@ try {
 }
 
 function isSuperVerified($pdo, $userId) {
+    error_log("Checking if user {$userId} is super verified.");
     $stmt = $pdo->prepare("SELECT super_verified FROM VerificationStatuses WHERE user_id = ?");
     $stmt->execute([$userId]);
     $verificationStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    error_log("is_super_verified: " . print_r($verificationStatus, true));
     return $verificationStatus && $verificationStatus['super_verified'];
 }
 ?>
