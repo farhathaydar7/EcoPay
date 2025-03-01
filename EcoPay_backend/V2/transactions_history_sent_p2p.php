@@ -30,6 +30,10 @@ try {
             $p2pTransfer = $stmtP2P->fetch(PDO::FETCH_ASSOC);
 
             if ($p2pTransfer && $p2pTransfer['sender_id'] == $userId) {
+                $stmt = $pdo->prepare("SELECT u.fName, u.lName, u.email FROM Users u JOIN P2P_Transfers p2p ON u.id = p2p.receiver_id WHERE p2p.transaction_id = ?");
+                $stmt->execute([$transaction->id]);
+                $receiver = $stmt->fetch(PDO::FETCH_ASSOC);
+
                 $transactionData = [
                     'id' => $transaction->id,
                     'type' => $transaction->type,
@@ -40,10 +44,6 @@ try {
                     'receiver_email' => 'Unknown'
                 ];
 
-                // Fetch receiver's name
-                $stmt = $pdo->prepare("SELECT fName, lName, email FROM Users WHERE id = ?");
-                $stmt->execute([$transaction->receiver_id]);
-                $receiver = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($receiver) {
                     $transactionData['receiver'] = $receiver['fName'] . ' ' . $receiver['lName'];
                     $transactionData['receiver_email'] = $receiver['email'];

@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            if (sentP2pResponse.data) {
+            if (Array.isArray(sentP2pResponse.data)) {
                 sentP2pResponse.data.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     sentP2pTransactionTableBody.appendChild(row);
                 });
+            } else {
+                console.error('sentP2pResponse.data is not an array:', sentP2pResponse.data);
             }
 
             if (
