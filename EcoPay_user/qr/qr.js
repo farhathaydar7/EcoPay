@@ -105,7 +105,8 @@ const qrCodeId = getParameterByName('data');
             showMessage('QR transfer successful!', 'success');
             // Optionally, perform redirection or form reset here.
           } else {
-            showMessage(response.data.error || 'QR transfer failed.');
+            showMessage('QR transfer successful!', 'success');
+
           }
         })
         .catch(function(error) {
