@@ -1,7 +1,9 @@
 <?php
 require_once 'db_connection.php';
-require_once 'User.php'; // Include User.php where isSuperVerified is now defined
+require_once 'User.php';
 require_once 'Wallet.php';
+// Insert transaction record directly, without a separate Transaction class.
+require_once '../V2/models/receipt.model.php'; // Include Receipt Model
 
 session_start();
 
@@ -16,7 +18,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $userId = $_SESSION["user_id"] ?? null;
-
 if ($userId === null) {
     echo json_encode(["success" => false, "message" => "User ID not found."]);
     die();
@@ -39,43 +40,56 @@ $amount = floatval($amount);
 
 try {
     // Fetch wallet details
-    $stmt = $pdo->prepare("SELECT id, user_id, wallet_name, balance, currency, is_default FROM Wallets WHERE id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("SELECT id, user_id, balance FROM Wallets WHERE id = ? AND user_id = ?");
     $stmt->execute([$walletId, $userId]);
     $walletData = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
     if (!$walletData) {
         echo json_encode(["success" => false, "message" => "Wallet not found."]);
         die();
     }
-
-    $wallet = new Wallet($walletData);
-    $newBalance = $wallet->balance + $amount;
+    
+    $newBalance = $walletData['balance'] + $amount;
 
     // Update wallet balance
     $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE id = ? AND user_id = ?");
-    $stmt->execute([$newBalance, $wallet->id, $userId]);
-
+    $stmt->execute([$newBalance, $walletId, $userId]);
+    
     if ($stmt->rowCount() == 0) {
         echo json_encode(["success" => false, "message" => "Balance update failed."]);
         die();
     }
 
-    // Record transaction without transaction handling - WARNING: No rollback!
-    require_once 'Transaction.php';
-    $transaction = new Transaction($pdo);
-    $transactionId = $transaction->recordPayment($userId, $walletId, 'deposit', $amount, 'completed');
-
-    if ($transactionId) {
-        echo json_encode([
-            "success" => true,
-            "message" => "Transaction recorded successfully",
-            "transaction_id" => $transactionId
-        ]);
-        die();
-    } else {
+    // Insert transaction record directly
+    $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp) 
+                           VALUES (?, ?, 'deposit', ?, 'completed', NOW())");
+    $stmt->execute([$userId, $walletId, $amount]);
+    $transactionId = $pdo->lastInsertId();
+    
+    if (!$transactionId) {
         echo json_encode(["success" => false, "message" => "Failed to record transaction."]);
         die();
     }
+
+    // Create receipt using the Receipt model
+    $receiptModel = new Receipt($pdo);
+    $receiptData = $receiptModel->createReceipt('deposit', $userId, $walletId, $amount, $transactionId, [
+        "method" => "Bank Transfer",
+        "status" => "Completed"
+    ]);
+    
+    if (!$receiptData) {
+        echo json_encode(["success" => false, "message" => "Failed to generate receipt."]);
+        die();
+    }
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Deposit successful",
+        "transaction_id" => $transactionId,
+        "receipt" => $receiptData
+    ]);
+    die();
 
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);

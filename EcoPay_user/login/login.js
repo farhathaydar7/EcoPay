@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.data.status === 'success') {
                 messageDiv.textContent = response.data.message;
                 const user = response.data.user;
-                localStorage.setItem('user', JSON.stringify(user));
+                sessionStorage.setItem('user', JSON.stringify(user));
                 window.location.href = '../dashboard/dashboard.html';
             } else {
                 messageDiv.textContent = response.data.message;

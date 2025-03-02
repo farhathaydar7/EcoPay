@@ -33,8 +33,8 @@ if (!$amount || !is_numeric($amount) || $amount <= 0) {
 
 try {
     // Prepare and execute the SQL query
-    $stmt = $pdo->prepare("INSERT INTO QRCodes (user_id, wallet_id, amount) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $walletId, $amount]);
+    $stmt = $pdo->prepare("INSERT INTO QRCodes (user_id, wallet_id, amount, sender_id) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$userId, $walletId, $amount, $userId]);
 
     // Get the last inserted ID
     $qrCodeId = $pdo->lastInsertId();

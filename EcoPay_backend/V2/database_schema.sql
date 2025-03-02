@@ -143,6 +143,24 @@ CREATE TABLE QRCodes (
     amount DECIMAL(15,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
-    FOREIGN KEY (wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE
+    sender_id INT NULL, -- Sender who scanned the QR code
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE, -- Receiver of the QR code
+    FOREIGN KEY (wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE -- Sender of the QR code
 );
+-- Receipts Table
+CREATE TABLE Receipts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_id INT NOT NULL,
+    user_id INT NOT NULL,
+    wallet_id INT NOT NULL,
+    transaction_type ENUM('deposit', 'withdraw', 'p2p','rp') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    extra_data JSON DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (transaction_id) REFERENCES Transactions(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (wallet_id) REFERENCES Wallets(id)
+);
+
+

@@ -1,20 +1,21 @@
+<!-- p2p_email.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P Transfer</title>
+    <title>P2P Transfer via Email</title>
     <link rel="stylesheet" href="../css/styles.css">
-    
 </head>
 <body>
     <div class="container">
         <div class="p2p-container">
-            <h2>P2P Transfer</h2>
+            <h2>P2P Transfer (Email)</h2>
             <div id="message" class="message"></div>
             <form id="p2pForm">
                 <div class="form-group">
-                    <input type="hidden" id="receiver_email" name="receiver_identifier" required readonly>
+                    <label for="receiver_email">Receiver Email:</label>
+                    <input type="email" id="receiver_email" name="receiver_email" required>
                 </div>
                 <div class="form-group">
                     <label for="sender_wallet_id">Your Wallet:</label>
@@ -24,14 +25,14 @@
                 </div>
                 <div class="form-group">
                     <label for="amount">Amount:</label>
-                    <input type="number" step="0.01" id="amount" name="amount" required readonly>
+                    <input type="number" step="0.01" id="amount" name="amount" required>
                 </div>
                 <button type="submit">Transfer</button>
             </form>
         </div>
     </div>
     <script src="../axios.min.js"></script>
-    <script src="p2p.js"></script>
+    <script src="p2p_email.js"></script>
     <script src="../universal.js"></script>
 </body>
 </html>

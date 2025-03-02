@@ -1,26 +1,37 @@
 <?php
-header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: http://192.168.137.1");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 require_once 'db_connection.php';
 
-// Read and decode JSON input
+$response = [];  // Initialize response array
+
+// Handle both GET and POST requests
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
-// Check if data is received properly
-if ($data === null) {
-    die(json_encode(["error" => "Invalid JSON format"]));
-}
-
-// Extract variables safely
-$qrCodeId = $data["qr_code_id"] ?? null;
+$qrCodeId = $_GET["data"] ?? $data["data"] ?? null;  // Support both GET and POST
 
 // Validate required fields
 if (!$qrCodeId || !is_numeric($qrCodeId)) {
-    die(json_encode(["error" => "qr_code_id is missing or invalid"]));
+    $response = ["error" => "QR Code ID is missing or invalid"];
+    echo json_encode($response);
+    exit;
 }
 
 try {
@@ -32,13 +43,16 @@ try {
     $qrCodeData = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($qrCodeData) {
-        // Return the data as a JSON response
-        echo json_encode(["success" => true, "qr_code" => $qrCodeData]);
+        $response = ["success" => true, "qr_code" => $qrCodeData];
     } else {
-        die(json_encode(["error" => "QR Code not found"]));
+        $response = ["error" => "QR Code not found"];
     }
 } catch (PDOException $e) {
     error_log("QR Code fetching error: " . $e->getMessage());
-    die(json_encode(["error" => "QR Code fetching failed: " . $e->getMessage()]));
+    $response = ["error" => "QR Code fetching failed: " . $e->getMessage()];
 }
+
+// Send the JSON response once
+echo json_encode($response);
+exit;
 ?>

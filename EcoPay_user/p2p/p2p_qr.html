@@ -1,0 +1,35 @@
+
+<!-- p2p_qr.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Transfer via QR</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="p2p-container">
+            <h2>P2P Transfer (QR)</h2>
+            <div id="message" class="message"></div>
+            <form id="p2pForm">
+                <div class="form-group">
+                    <label for="sender_wallet_id">Your Wallet:</label>
+                    <select id="sender_wallet_id" name="sender_wallet_id" required>
+                        <option value="">Select a wallet</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" step="0.01" id="amount" name="amount" required readonly>
+                </div>
+                <button type="submit">Transfer</button>
+            </form>
+        </div>
+    </div>
+    <script src="../axios.min.js"></script>
+    <script src="p2p_qr.js"></script>
+    <script src="../universal.js"></script>
+</body>
+</html>

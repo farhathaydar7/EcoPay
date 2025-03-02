@@ -3,6 +3,10 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Allow cross-origin requests (adjust the origin as needed)
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
+
 require_once 'db_connection.php';
 require_once 'Wallet.php';
 
@@ -53,3 +57,4 @@ try {
     echo json_encode($response_data);
     exit;
 }
+?>

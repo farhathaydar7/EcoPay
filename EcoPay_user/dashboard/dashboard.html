@@ -1,69 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="../css/styles.css">
+  <meta charset="UTF-8">
+  <title>User Dashboard & QR Code Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../axios.min.js"></script>
+  <script src="../qrcode.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+
 </head>
 <body>
-    <div class="dashboard-container">
-        <h2>Welcome to your Dashboard</h2>
-        <div id="user-info">
-            <h3>User Information</h3>
-            <p>Name: <span id="user-name"></span></p>
-            <p>Email: <span id="user-email"></span></p>
-            <!-- <p>Balance: <span id="user-balance"></span></p> -->
-        </div>
-        <div id="user-wallets">
-            <h3>Wallets</h3>
-            <div id="wallet-controls">
-                <button id="create-wallet-button">Create Wallet</button>
-                <button id="switchBalanceButton">Switch Balance</button>
-            </div>
-            <div id="wallets-list"></div>
-        </div>
-
-        <div id="dashboard-actions">
-            <h3>Actions</h3>
-            <ul>
-                <li><a href="../deposit/deposit.html">Deposit</a></li>
-                <li><a href="../withdraw/withdraw.html">Withdraw</a></li>
-                <li><a href="../p2p/p2p.html">P2P Transfer</a></li>
-                <li><a href="../history/history.html">Transaction History</a></li>
-                <li><a href="../profile/profile.html">Profile</a></li>
-            </ul>
-        </div>
-        <div id="qr-actions">
-           <h3>QR Actions</h3>
-           <button id="generate-request-button">Generate Request</button>
-           <div id="qr-code-container"></div>
-        </div>
-</div>
-    <div id="qrSendModal" style="display: none;">
-        <label for="qrSendWalletId">Select Receiving Wallet:</label>
-        <select id="qrSendWalletId"></select>
-        <label for="qrSendAmount">Amount to Request:</label>
-        <input type="number" id="qrSendAmount" min="0" value="1.00">
-        <button id="generateQrCodeButton">Generate QR Code</button>
-        <button id="closeQrSendModal">Cancel</button>
+  <h1>User Dashboard</h1>
+  <p>Name: <span id="user-name"></span></p>
+  <p>Email: <span id="user-email"></span></p>
+  
+  <section id="user-wallets">
+    <h2>Your Wallets</h2>
+    <div id="wallets-list"></div>
+    <button id="create-wallet-button">Create New Wallet</button>
+    <button id="switchBalanceButton">Switch Balance</button>
+  </section>
+  
+  <section id="dashboard-actions">
+    <h2>Actions</h2>
+    <ul>
+      <li><a href="../deposit/deposit.html">Deposit</a></li>
+      <li><a href="../withdraw/withdraw.html">Withdraw</a></li>
+      <li><a href="../p2p/p2p_email.html">P2P Transfer</a></li>
+      <li><a href="../history/history.html">Transaction History</a></li>
+      <li><a href="../profile/profile.html">Profile</a></li>
+    </ul>
+  </section>
+  
+  <section>
+    <h2>Generate a Payment Request via QR Code</h2>
+    <button id="generate-request-button">Generate QR Request</button>
+  </section>
+  
+  <!-- QR Send Modal -->
+  <div id="qrSendModal" class="modal">
+    <div class="modal-content">
+      <h3>Generate QR Code</h3>
+      <label for="qrSendWalletId">Select Wallet:</label>
+      <select id="qrSendWalletId"></select>
+      
+      <label for="qrSendAmount">Amount:</label>
+      <input type="number" id="qrSendAmount" placeholder="Enter amount" />
+      
+      <button id="generateQrCodeButton">Generate QR Code</button>
+      <button id="closeQrSendModalButton">Cancel</button>
+      <div id="qr-code-container" style="margin-top: 15px;"></div>
     </div>
-
-    <div id="switchBalanceModal" style="display: none;">
-        <label for="toWalletId">Select Wallet:</label>
-        <select id="toWalletId"></select>
-
-        <label for="amount">Enter Amount:</label>
-        <input type="number" id="amount" min="0">
-
-        <button id="switchBalanceSubmit">Confirm Transfer</button>
-        <button id="closeSwitchBalanceModal">Cancel</button>
+  </div>
+  
+  <!-- Switch Balance Modal -->
+  <div id="switchBalanceModal" class="modal">
+    <div class="modal-content">
+      <h3>Switch Balance Between Wallets</h3>
+      <label for="toWalletId">Select Target Wallet:</label>
+      <select id="toWalletId"></select>
+      
+      <label for="switchAmount">Amount:</label>
+      <input type="number" id="switchAmount" placeholder="Enter amount" />
+      
+      <button id="switchBalanceSubmit">Submit</button>
+      <button id="closeSwitchBalanceModal">Cancel</button>
     </div>
-
-    <script src="../axios.min.js"></script>
-    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-    <script src="dashboard.js"></script>
-    <script src="../universal.js"></script>
-    <script src="../html5-qrcode.min.js"></script>
+  </div>
+  
+  <script src="dashboard.js"></script>
 </body>
 </html>
