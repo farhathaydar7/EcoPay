@@ -14,8 +14,7 @@
             <div id="message" class="message"></div>
             <form id="p2pForm">
                 <div class="form-group">
-                    <label for="receiver_email">Receiver's Email:</label>
-                    <input type="email" id="receiver_email" name="receiver_identifier" required>
+                    <input type="hidden" id="receiver_email" name="receiver_identifier" required readonly>
                 </div>
                 <div class="form-group">
                     <label for="sender_wallet_id">Your Wallet:</label>
@@ -25,7 +24,7 @@
                 </div>
                 <div class="form-group">
                     <label for="amount">Amount:</label>
-                    <input type="number" step="0.01" id="amount" name="amount" required>
+                    <input type="number" step="0.01" id="amount" name="amount" required readonly>
                 </div>
                 <button type="submit">Transfer</button>
             </form>

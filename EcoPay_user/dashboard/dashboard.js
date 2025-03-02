@@ -150,18 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                 wallet_id: walletId,
                                 user_id: userId
                             })
-                                .then(response => {
-                                    if (response.data && response.data.success) {
-                                        alert('Default wallet set successfully!');
-                                        fetchUserWallets(); // Refetch wallets
-                                    } else {
-                                        alert('Failed to set default wallet: ' + (response.data.message || 'Unknown error'));
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error setting default wallet:', error);
-                                    alert('Could not set default wallet. Please check the console for details.');
-                                });
+                            .then(response => {
+                                if (response.data && response.data.success) {
+                                    alert('Default wallet set successfully!');
+                                    fetchUserWallets(); // Refetch wallets
+                                } else {
+                                    alert('Failed to set default wallet: ' + (response.data.message || 'Unknown error'));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error setting default wallet:', error);
+                                alert('Could not set default wallet. Please check the console for details.');
+                            });
                         });
                     });
 
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (wallet.wallet_id != fromWalletId) {
                                     let option = document.createElement('option');
                                     option.value = wallet.wallet_id;
-                                    option.text = `${wallet.wallet_name} (${wallet.wallet_id})`;
+                                    option.text = `${wallet.wallet_name} (${wallet.wallet.id})`;
                                     dropdown.add(option);
                                 }
                             });
@@ -253,18 +253,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 wallet_name: walletName,
                 user_id: userId
             })
-                .then(response => {
-                    if (response.data && response.data.success) {
-                        alert('Wallet created successfully!');
-                        fetchUserWallets();
-                    } else {
-                        alert('Failed to create wallet: ' + (response.data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error creating wallet:', error);
-                    alert('Could not create wallet. Please check the console for details.');
-                });
+            .then(response => {
+                if (response.data && response.data.success) {
+                    alert('Wallet created successfully!');
+                    fetchUserWallets();
+                } else {
+                    alert('Failed to create wallet: ' + (response.data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error creating wallet:', error);
+                alert('Could not create wallet. Please check the console for details.');
+            });
         }
     });
+
+    const generateRequestButton = document.getElementById('generate-request-button');
+    const qrCodeContainer = document.getElementById('qr-code-container');
+    const qrSendModal = document.getElementById('qrSendModal');
+    const qrSendWalletIdSelect = document.getElementById('qrSendWalletId');
+    const qrSendAmountInput = document.getElementById('qrSendAmount');
+    const generateQrCodeButton = document.getElementById('generateQrCodeButton');
+    const closeQrSendModalButton = document.getElementById('closeQrSendModalButton');
+
+    generateRequestButton.addEventListener('click', () => {
+        qrSendModal.style.display = 'block';
+        qrSendWalletIdSelect.innerHTML = ''; // Clear previous options
+        walletsData.forEach(wallet => {
+            let option = document.createElement('option');
+            option.value = wallet.wallet_id;
+            option.text = `${wallet.wallet_name} (${wallet.currency})`;
+            qrSendWalletIdSelect.add(option);
+        });
+
+        document.getElementById('generateQrCodeButton').addEventListener('click', () => {
+            qrCodeContainer.innerHTML = ""; // Clear previous QR code
+            const selectedWalletId = qrSendWalletIdSelect.value;
+            const amount = qrSendAmountInput.value;
+
+            axios.post('../../EcoPay_backend/V2/create_qr_code.php', {
+                user_id: userId,
+                wallet_id: selectedWalletId,
+                amount: amount
+            })
+            .then(response => {
+                if (response.data && response.data.qr_code_id) {
+                    const qrCodeId = response.data.qr_code_id;
+                    // Construct the full URL with parameters
+                    const apiLink = `http://192.168.137.1/Project_EcoPay/EcoPay_user/p2p/p2p.html?qr_code_id=${qrCodeId}`;
+
+                    const qrData = apiLink;
+                    console.log("Generated QR Code URL:", apiLink);
+                    const qrcode = new QRCode(qrCodeContainer, {
+                        text: qrData,
+                        width: 128,
+                        height: 128,
+                        colorDark: "#000",
+                        colorLight: "#fff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } else {
+                    alert('Failed to generate QR code.');
+                }
+            })
+            .catch(error => {
+                console.error('Error generating QR code:', error);
+                alert('Could not generate QR code. Please check the console for details.');
+            });
+        });
+    });
+
+    closeQrSendModalButton.addEventListener('click', () => {
+        qrSendModal.style.display = 'none';
+        qrCodeContainer.innerHTML = ''; // Clear QR code when modal is closed
+    });
+
+    // The QR Receive functionality will be implemented in p2p.js
 });

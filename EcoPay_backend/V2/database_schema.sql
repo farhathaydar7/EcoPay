@@ -134,3 +134,15 @@ CREATE TABLE P2P_Transfers (
     FOREIGN KEY (sender_id) REFERENCES Users(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES Users(id) ON DELETE CASCADE
 );
+
+-- QRCodes Table
+CREATE TABLE QRCodes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    wallet_id INT NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (wallet_id) REFERENCES Wallets(id) ON DELETE CASCADE
+);
