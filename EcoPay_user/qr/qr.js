@@ -75,7 +75,7 @@ const qrCodeId = getParameterByName('data');
         showMessage('Error loading wallets.');
       });
     }
-    
+    //test
     populateWallets();
   
     // Handle form submission for QR transfer
