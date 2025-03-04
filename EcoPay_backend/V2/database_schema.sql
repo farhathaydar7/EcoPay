@@ -1,5 +1,5 @@
 -- Create Database
-CREATE DATABASE project_ecopay;
+-- CREATE DATABASE project_ecopay;
 USE project_ecopay;
 
 -- Users Table
