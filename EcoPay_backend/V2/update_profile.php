@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $userId = $_SESSION["user_id"];
 $response_data = [];
 
-$uploadsDir = 'C:/xampp/htdocs/Project_EcoPay/uploads/';
+$uploadsDir = '/var/www/html/EcoPay/uploads/';
 
 // Ensure directories exist
 if (!is_dir($uploadsDir)) {

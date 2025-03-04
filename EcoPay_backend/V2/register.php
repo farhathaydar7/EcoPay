@@ -1,5 +1,5 @@
 <?php
-require '../../vendor/autoload.php';
+require '/var/www/html/EcoPay/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

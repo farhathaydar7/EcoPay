@@ -1,7 +1,7 @@
 <?php
-require '../vendor/autoload.php';
+require '/var/www/html/EcoPay/vendor/autoload.php';
 require_once 'db_connection.php';
-require_once '../V2/models/receipt.model.php';
+require_once '/var/www/html/EcoPay/V2/models/receipt.model.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

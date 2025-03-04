@@ -1,14 +1,12 @@
 <?php
 require_once 'db_connection.php';
 
-// This script should be run periodically (e.g., using a cron job) to process recurring transfers.
+
 
 try {
     $pdo->beginTransaction();
 
-   // No session or user context here, as this is a cron job script
-
-    // --- Fetch Payment Schedules Due for Execution ---
+  
     $currentTimestamp = date('Y-m-d H:i:s');
     $stmt = $pdo->prepare("SELECT * FROM PaymentSchedules WHERE next_execution <= ?");
     $stmt->execute([$currentTimestamp]);
@@ -38,19 +36,17 @@ try {
                 continue; // Skip to the next schedule
             }
 
-            // --- Update Balances (Assuming transfer to system or another predefined account for simplicity) ---
-            // In a real scenario, you might have receiver_id in PaymentSchedules or handle different types of recurring payments
             $newSenderBalance = $senderWallet["balance"] - $amount;
-            // Assuming transfer from the first wallet (wallet_number = 1)
+       
             $stmt = $pdo->prepare("UPDATE Wallets SET balance = ? WHERE user_id = ? AND wallet_number = 1");
             $stmt->execute([$newSenderBalance, $userId]);
 
-            // --- Record Transactions ---
+      
             $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, type, amount, status) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$userId, 'recurring_payment', -$amount, 'completed']); // Negative amount for sender
+            $stmt->execute([$userId, 'recurring_payment', -$amount, 'completed']); 
 
 
-            // --- Update Next Execution Time ---
+         
             $nextExecutionTime = null;
             switch ($frequency) {
                 case 'daily':
