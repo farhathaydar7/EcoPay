@@ -55,35 +55,36 @@ class Wallet {
             return ['success' => false, 'message' => 'Error renaming wallet', 'error' => $e->getMessage()];
         }
     }
-
+    
     public function createWallet($userId, $walletName, $currency = 'USD') {
         try {
             // Check if the user has less than 3 wallets
             $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Wallets WHERE user_id = ?");
             $stmt->execute([$userId]);
             $walletCount = $stmt->fetchColumn();
-
+    
             if ($walletCount >= 3) {
                 return ['success' => false, 'message' => 'You can only create up to 3 wallets.'];
             }
-
+    
             // Determine if this is the first wallet for the user
             $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Wallets WHERE user_id = ?");
             $stmt->execute([$userId]);
             $isFirstWallet = ($stmt->fetchColumn() == 0);
-
-            // Check if wallet with the same name already exists for the user
+    
             // Check if wallet with the same name already exists for the user
             $stmt = $this->pdo->prepare("SELECT id FROM Wallets WHERE user_id = ? AND wallet_name = ?");
             $stmt->execute([$userId, $walletName]);
             if ($stmt->fetch()) {
                 return ['success' => false, 'message' => 'A wallet with this name already exists.'];
             }
-
+    
+            // Insert the new wallet with the correct value for is_default
             $stmt = $this->pdo->prepare("INSERT INTO Wallets (user_id, wallet_name, currency, is_default) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$userId, $walletName, $currency, $isFirstWallet]);
+            $stmt->execute([$userId, $walletName, $currency, (int)$isFirstWallet]); // Cast to integer
+    
             $walletId = $this->pdo->lastInsertId();
-
+    
             if ($walletId) {
                 return ['success' => true, 'message' => 'Wallet created successfully', 'wallet_id' => $walletId];
             } else {
@@ -94,6 +95,7 @@ class Wallet {
             return ['success' => false, 'message' => 'Error creating wallet', 'error' => $e->getMessage()];
         }
     }
+    
 
     public function deleteWallet($walletId) {
         try {
