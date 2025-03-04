@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fetchUserInfo() {
-    axios.get('../../EcoPay_backend/V2/profile.php')
+    axios.get('http://52.47.95.15/EcoPay_backend/V2/profile.php')
       .then(response => {
         if (response.data && response.data.user) {
           const userData = response.data.user;
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fetchUserWallets() {
-    return axios.get('../../EcoPay_backend/V2/get_wallets.php')
+    return axios.get('http://52.47.95.15/EcoPay_backend/V2/get_wallets.php')
       .then(response => {
         if (response.data && response.data.wallets) {
           walletsData = response.data.wallets;
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       button.addEventListener('click', (event) => {
         const walletId = event.target.dataset.walletId;
         if (confirm('Are you sure you want to delete this wallet?')) {
-          axios.post('../../EcoPay_backend/V2/wallets.php', {
+          axios.post('http://52.47.95.15/EcoPay_backend/V2/wallets.php', {
             action: 'deleteWallet',
             wallet_id: walletId,
             user_id: userId
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const walletId = event.target.dataset.walletId;
         const newWalletName = prompt('Enter new wallet name:');
         if (newWalletName) {
-          axios.post('../../EcoPay_backend/V2/wallets.php', {
+          axios.post('http://52.47.95.15/EcoPay_backend/V2/wallets.php', {
             action: 'renameWallet',
             wallet_id: walletId,
             new_name: newWalletName,
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.set-default-wallet-button').forEach(button => {
       button.addEventListener('click', (event) => {
         const walletId = event.target.dataset.walletId;
-        axios.post('../../EcoPay_backend/V2/wallets.php', {
+        axios.post('http://52.47.95.15/EcoPay_backend/V2/wallets.php', {
           action: 'setDefaultWallet',
           wallet_id: walletId,
           user_id: userId
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const toWalletId = toWalletIdSelect.value;
           const amount = switchAmountInput.value;
           if (toWalletId && amount) {
-            axios.post('../../EcoPay_backend/V2/wallets.php', {
+            axios.post('http://52.47.95.15/EcoPay_backend/V2/wallets.php', {
               action: 'switchBalance',
               from_wallet_id: fromWalletId,
               to_wallet_id: toWalletId,
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
   createWalletButton.addEventListener('click', () => {
     const walletName = prompt('Enter wallet name:');
     if (walletName) {
-      axios.post('../../EcoPay_backend/V2/wallets.php', {
+      axios.post('http://52.47.95.15/EcoPay_backend/V2/wallets.php', {
         action: 'createWallet',
         wallet_name: walletName,
         user_id: userId
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedWalletId = qrSendWalletIdSelect.value;
     const amount = qrSendAmountInput.value;
     // Request the backend to create a new QR code
-    axios.post('../../EcoPay_backend/V2/create_qr_code.php', {
+    axios.post('http://52.47.95.15/EcoPay_backend/V2/create_qr_code.php', {
       user_id: userId,
       wallet_id: selectedWalletId,
       amount: amount
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.data && response.data.qr_code_id) {
         const qrCodeId = response.data.qr_code_id;
         // Construct the new link format for the QR page.
-        const apiLink = `http://192.168.137.1/Project_EcoPay/EcoPay_user/qr/qr.html?data=${qrCodeId}`;
+        const apiLink = `http://52.47.95.15/EcoPay_user/qr/qr.html?data=${qrCodeId}`;
 
         console.log("Generated QR Code URL:", apiLink);
         // Generate the QR code using the QRCode library

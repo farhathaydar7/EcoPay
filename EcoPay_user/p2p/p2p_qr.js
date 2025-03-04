@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const messageDiv = document.getElementById('message');
     const senderWalletSelect = document.getElementById('sender_wallet_id');
     const amountInput = document.getElementById('amount');
-    const API_ENDPOINT = 'http://localhost/Project_EcoPay/EcoPay_backend/V2/';
+    const API_ENDPOINT = 'http://52.47.95.15/EcoPay_backend/V2/';
 
     function getParameterByName(name, url = window.location.href) {
         name = name.replace(/[\[\]]/g, '\\$&');

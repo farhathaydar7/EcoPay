@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const senderWalletSelect = document.getElementById('sender_wallet_id');
     const receiverEmailInput = document.getElementById('receiver_email');
     const amountInput = document.getElementById('amount');
-    let API_ENDPOINT = 'http://192.168.137.1/Project_EcoPay/EcoPay_backend/V2/';
+    let API_ENDPOINT = 'http://52.47.95.15/EcoPay_backend/V2/';
 
     function fetchUserId() {
         const userId = sessionStorage.getItem("user_id");

@@ -1,6 +1,6 @@
 async function fetchWallets() {
     try {
-        const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
+        const response = await axios.get('http://52.47.95.15/EcoPay_backend/V2/get_wallets.php');
         
         if (response.data.status === 'success') {
             const walletSelect = document.getElementById('wallet');
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Call the withdraw API
         try {
-            const response = await fetch('../../EcoPay_backend/V2/withdraw.php', {
+            const response = await fetch('http://52.47.95.15/EcoPay_backend/V2/withdraw.php', {
                 method: 'POST',
                 body: data,
                 headers: {

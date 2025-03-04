@@ -1,6 +1,6 @@
 async function fetchWallets() {
     try {
-        const response = await axios.get('../../EcoPay_backend/V2/get_wallets.php');
+        const response = await axios.get('http://52.47.95.15/EcoPay_backend/V2/get_wallets.php');
 
         if (!response.data || !Array.isArray(response.data.wallets)) {
             throw new Error("Invalid wallet data received");
@@ -48,7 +48,7 @@ async function deposit() {
 
     try {
         // Check user verification
-        const profileResponse = await axios.get('../../EcoPay_backend/V2/profile.php');
+        const profileResponse = await axios.get('http://52.47.95.15/EcoPay_backend/V2/profile.php');
 
         if (!profileResponse.data || profileResponse.data.status !== "success") {
             messageDiv.textContent = 'Profile check failed.';
@@ -61,7 +61,7 @@ async function deposit() {
         }
 
         // Perform deposit
-        const depositResponse = await axios.post('../../EcoPay_backend/V2/deposit.php', 
+        const depositResponse = await axios.post('http://52.47.95.15/EcoPay_backend/V2/deposit.php', 
             new URLSearchParams({
                 wallet_id: walletId,
                 amount: amount

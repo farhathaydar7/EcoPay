@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchTransactionHistory() {
         try {
             const [regularResponse, receivedP2pResponse, sentP2pResponse] = await Promise.all([
-                axios.get('../../EcoPay_backend/V2/transactions_history_regular.php'),
-                axios.get('../../EcoPay_backend/V2/transactions_history_received_p2p.php'),
-                axios.get('../../EcoPay_backend/V2/transactions_history_sent_p2p.php')
+                axios.get('http://52.47.95.15/EcoPay_backend/V2/transactions_history_regular.php'),
+                axios.get('http://52.47.95.15/EcoPay_backend/V2/transactions_history_received_p2p.php'),
+                axios.get('http://52.47.95.15/EcoPay_backend/V2/transactions_history_sent_p2p.php')
             ]);
 
             console.log("Received P2P Response:", receivedP2pResponse.data);

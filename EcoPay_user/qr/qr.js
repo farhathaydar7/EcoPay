@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const messageDiv = document.getElementById('message');
     const senderWalletSelect = document.getElementById('sender_wallet_id');
     const amountInput = document.getElementById('amount');
-    const API_ENDPOINT = 'http://localhost/Project_EcoPay/EcoPay_backend/V2/';
+    const API_ENDPOINT = 'http://52.47.95.15/EcoPay_backend/V2/';
   
     // Helper: Show message
     function showMessage(message, type = 'error') {
@@ -56,7 +56,7 @@ const qrCodeId = getParameterByName('data');
   
     // Populate sender wallets
     function populateWallets() {
-      axios.get(`http://192.168.137.1/Project_EcoPay/EcoPay_backend/V2/get_wallets.php`)
+      axios.get(`http://52.47.95.15/EcoPay_backend/V2/get_wallets.php`)
       .then(function(response) {
         console.log("✅ Wallets API Response:", response.data);
         if (response.data.status === 'success' && Array.isArray(response.data.wallets)) {
