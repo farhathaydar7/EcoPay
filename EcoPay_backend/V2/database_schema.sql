@@ -37,7 +37,6 @@ CREATE TABLE Wallets (
     UNIQUE (user_id, wallet_name)
 );
 
-CREATE UNIQUE INDEX idx_user_default_wallet ON Wallets (user_id, is_default) WHERE is_default = 1;
 
 -- Cards Table
 CREATE TABLE Cards (
