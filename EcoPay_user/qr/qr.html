@@ -6,31 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Include Axios from CDN -->
   <script src="../axios.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    .container { max-width: 500px; margin: auto; }
-    .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-    .message.error { background-color: #f8d7da; color: #721c24; }
-    .message.success { background-color: #d4edda; color: #155724; }
-    label { display: block; margin-bottom: 5px; }
-    input, select { width: 100%; padding: 8px; margin-bottom: 15px; }
-    button { padding: 10px 20px; }
-  </style>
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body>
+<body class="body">
   <div class="container">
     <h1>QR Transfer</h1>
-    <div id="message"></div>
+    <div id="message" class="message"></div>
     <form id="qrForm">
       <label for="sender_wallet_id">Select Wallet</label>
-      <select id="sender_wallet_id" name="sender_wallet_id" required>
+      <select id="sender_wallet_id" name="sender_wallet_id" required class="form-control">
         <option value="">-- Select a wallet --</option>
       </select>
       
       <label for="amount">Amount</label>
-      <input type="number" id="amount" name="amount" readonly required>
+      <input type="number" id="amount" name="amount" readonly required class="form-control">
       
-      <button type="submit">Submit Transfer</button>
+      <button type="submit" class="btn-primary">Submit Transfer</button>
     </form>
   </div>
 

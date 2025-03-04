@@ -9,20 +9,29 @@
   <link rel="stylesheet" href="../css/styles.css">
 
 </head>
-<body>
+<body class="body">
+  <div class="main-content">
+    <div id="navbar-container"></div>
+    <script>
+      fetch('../navbar.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('navbar-container').innerHTML = data;
+        });
+    </script>
   <h1>User Dashboard</h1>
   <p>Name: <span id="user-name"></span></p>
   <p>Email: <span id="user-email"></span></p>
   
-  <section id="user-wallets">
+  <section id="user-wallets" class="container">
     <h2>Your Wallets</h2>
     <div id="wallets-list"></div>
-    <button id="create-wallet-button">Create New Wallet</button>
-    <button id="switchBalanceButton">Switch Balance</button>
+    <button id="create-wallet-button" class="btn-primary">Create New Wallet</button>
+    <button id="switchBalanceButton" class="btn-primary">Switch Balance</button>
   </section>
   
-  <section id="dashboard-actions">
-    <h2>Actions</h2>
+  <section id="dashboard-actions" class="dashboard-actions">
+    <h3>Actions</h3>
     <ul>
       <li><a href="../deposit/deposit.html">Deposit</a></li>
       <li><a href="../withdraw/withdraw.html">Withdraw</a></li>
@@ -32,9 +41,9 @@
     </ul>
   </section>
   
-  <section>
+  <section class="container">
     <h2>Generate a Payment Request via QR Code</h2>
-    <button id="generate-request-button">Generate QR Request</button>
+    <button id="generate-request-button" class="btn-primary">Generate QR Request</button>
   </section>
   
   <!-- QR Send Modal -->
@@ -42,13 +51,13 @@
     <div class="modal-content">
       <h3>Generate QR Code</h3>
       <label for="qrSendWalletId">Select Wallet:</label>
-      <select id="qrSendWalletId"></select>
+      <select id="qrSendWalletId" class="form-control"></select>
       
       <label for="qrSendAmount">Amount:</label>
-      <input type="number" id="qrSendAmount" placeholder="Enter amount" />
+      <input type="number" id="qrSendAmount" placeholder="Enter amount" class="form-control"/>
       
-      <button id="generateQrCodeButton">Generate QR Code</button>
-      <button id="closeQrSendModalButton">Cancel</button>
+      <button id="generateQrCodeButton" class="btn-primary">Generate QR Code</button>
+      <button id="closeQrSendModalButton" class="btn-primary">Cancel</button>
       <div id="qr-code-container" style="margin-top: 15px;"></div>
     </div>
   </div>
@@ -58,13 +67,13 @@
     <div class="modal-content">
       <h3>Switch Balance Between Wallets</h3>
       <label for="toWalletId">Select Target Wallet:</label>
-      <select id="toWalletId"></select>
+      <select id="toWalletId" class="form-control"></select>
       
       <label for="switchAmount">Amount:</label>
-      <input type="number" id="switchAmount" placeholder="Enter amount" />
+      <input type="number" id="switchAmount" placeholder="Enter amount" class="form-control"/>
       
-      <button id="switchBalanceSubmit">Submit</button>
-      <button id="closeSwitchBalanceModal">Cancel</button>
+      <button id="switchBalanceSubmit" class="btn-primary">Submit</button>
+      <button id="closeSwitchBalanceModal" class="btn-primary">Cancel</button>
     </div>
   </div>
   

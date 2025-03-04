@@ -3,10 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Extension Popup</title>
+  <link rel="stylesheet" href="../css/styles.css">
   
 </head>
-<body>
-  <button id="popupButton">Click Me!</button>
+<body class="body">
+  <div class="main-content">
+    <div id="navbar-container"></div>
+    <script>
+      fetch('../navbar.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('navbar-container').innerHTML = data;
+        });
+    </script>
+  <button id="popupButton" class="btn-primary">Click Me!</button>
 
   <script src="popup.js"></script>
 </body>
