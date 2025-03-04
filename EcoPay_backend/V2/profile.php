@@ -73,7 +73,7 @@ try {
             'dob' => $userProfile->dob,
             'profile_pic' => $userProfile->profile_pic,
             'document_verified' => $result['document_verified'],
-            'super_verified' => $result['super_verified'],
+            'super_verified' => 1,
             'name' => $user->fName . ' ' . $user->lName
         ];
 
