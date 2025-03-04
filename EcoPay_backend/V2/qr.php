@@ -14,7 +14,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 // Include necessary files
 require_once 'db_connection.php';
-require_once '/var/www/html/EcoPay/V2models/receipt.model.php'; // Include Receipt Model
+require_once '/var/www/html/EcoPay/EcoPay_backend/V2/models/receipt.model.php'; // Include Receipt Model
 
 try {
     $rawData = file_get_contents("php://input");

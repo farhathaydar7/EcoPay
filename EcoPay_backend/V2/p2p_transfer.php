@@ -5,7 +5,7 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
 require_once 'db_connection.php';
-require_once '/var/www/html/EcoPay/V2/models/receipt.model.php'; // Include Receipt model
+require_once '/var/www/html/EcoPay/EcoPay_backend/V2/models/receipt.model.php'; // Include Receipt model
 require_once 'config.php';
 
 ini_set('display_errors', 1);

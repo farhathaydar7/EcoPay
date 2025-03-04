@@ -1,6 +1,6 @@
 <?php
 require_once 'db_connection.php';
-require_once '../V2/models/receipt.model.php'; // Include the Receipt model
+require_once '/var/www/html/EcoPay/EcoPay_backend/V2/models/receipt.model.php'; // Include the Receipt model
 
 session_start();
 

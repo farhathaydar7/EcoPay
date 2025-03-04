@@ -18,7 +18,7 @@ if (!$sender_wallet_id) {
 function get_qr_code_data($qr_code_id) {
     require_once 'db_connection.php'; 
 
-    $url = '/var/www/html/EcoPay/V2/get_qr_code_data.php';
+    $url = '/var/www/html/EcoPay/EcoPay_backend/V2/get_qr_code_data.php';
     $data = ['qr_code_id' => $qr_code_id];
 
     $options = [
@@ -52,7 +52,7 @@ $receiver_wallet_id = $qr_data['wallet_id'];  // Wallet that should receive fund
 $amount = $qr_data['amount'];
 
 // Prepare data for the transfer request to your API
-$p2p_transfer_url = '/var/www/html/EcoPay/V2/p2p_transfer.php';
+$p2p_transfer_url = '/var/www/html/EcoPay/EcoPay_backend/V2/p2p_transfer.php';
 $p2p_transfer_data = [
     'action'           => 'p2pTransfer',
     'receiver_identifier' => $receiver_id, // In QR transfer, receiver is the QR creator

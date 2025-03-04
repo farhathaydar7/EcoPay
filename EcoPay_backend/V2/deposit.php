@@ -3,7 +3,7 @@ require_once 'db_connection.php';
 require_once 'User.php';
 require_once 'Wallet.php';
 // Insert transaction record directly, without a separate Transaction class.
-require_once '/var/www/html/EcoPay/V2/models/receipt.model.php'; // Include Receipt Model
+require_once '/var/www/html/EcoPay/EcoPay_backend/V2/models/receipt.model.php'; // Include Receipt Model
 
 session_start();
 

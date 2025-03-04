@@ -53,4 +53,4 @@ class Transaction {
 //$response = $transaction->recordPayment(1, 1, 'deposit', 100.00);
 //echo json_encode($response);
 ?>
-class Transaction {
+
