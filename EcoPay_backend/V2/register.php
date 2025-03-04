@@ -86,6 +86,10 @@ try {
     $stmt->execute([$user->userName, $user->fName, $user->lName, $user->email, $user->password, $user->otp, $user->otp_expiry, $user->activatedAcc]);
     $userId = $pdo->lastInsertId();
 
+    // Update VerificationStatuses to super verify the user
+    $stmt = $pdo->prepare("UPDATE VerificationStatuses SET super_verified = TRUE WHERE user_id = ?");
+    $stmt->execute([$userId]);
+
     // Create default wallet
     $stmt = $pdo->prepare("INSERT INTO Wallets (user_id, wallet_name, balance, currency, is_default) VALUES (?, 'Main Wallet', 0.00, 'USD', TRUE)");
     $stmt->execute([$userId]);
