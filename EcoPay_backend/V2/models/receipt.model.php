@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../bin/vendor/autoload.php';
+require '/var/www/html/EcoPay/vendor/autoload.php';
 require_once __DIR__ . '/../config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
