@@ -90,13 +90,15 @@ try {
     ]);
 
     error_log("After createReceipt - receiptData: " . print_r($receiptData, true));
-
     if (!$receiptData) {
         error_log("createReceipt returned false");
+<<<<<<< HEAD
 
 
     if (!$receiptData) {
 
+=======
+>>>>>>> ba26cc5 (bug fixes)
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
