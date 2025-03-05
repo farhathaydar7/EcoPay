@@ -12,29 +12,34 @@ class Receipt {
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
-        // Use the global variables defined in config.php
         global $smtpUsername, $smtpPassword;
         $this->smtpUsername = $smtpUsername;
         $this->smtpPassword = $smtpPassword;
     }
 
     /**
-     * Creates a receipt for a transaction, stores it in the database,
-     * retrieves the user's email(s), and sends receipt email(s).
-     *
-     * For p2p transactions, both the sender and the receiver (if provided in extraData) receive an email.
+     * Creates a receipt, stores it in the database, and sends an email.
      */
     public function createReceipt($transactionType, $userId, $walletId, $amount, $transactionId, $extraData = []) {
         try {
+            if (!$transactionId || !$userId || !$walletId || $amount <= 0) {
+                error_log("Invalid receipt data: transactionId=$transactionId, userId=$userId, walletId=$walletId, amount=$amount");
+                return false;
+            }
+
             $timestamp = date("Y-m-d H:i:s");
             $extraDataJson = json_encode($extraData);
+            if ($extraDataJson === false) {
+                error_log("JSON encoding error for extraData: " . json_last_error_msg());
+                return false;
+            }
 
-            // Insert receipt into the Receipts table
+            // Insert into database
             $stmt = $this->pdo->prepare("
                 INSERT INTO Receipts (transaction_id, user_id, wallet_id, transaction_type, amount, extra_data, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([
+            $result = $stmt->execute([
                 $transactionId, 
                 $userId, 
                 $walletId, 
@@ -44,45 +49,23 @@ class Receipt {
                 $timestamp
             ]);
 
-            if ($stmt->rowCount() > 0) {
-                if ($transactionType === 'p2p') {
-                    // For p2p transactions, send receipt to both parties.
-                    
-                    // Send email to sender
-                    $senderEmail = $this->getUserEmail($userId);
-                    error_log("Retrieved sender email: " . $senderEmail);
-                    if ($senderEmail) {
-                        $this->sendReceiptEmail($senderEmail, $transactionType, $amount, $transactionId, $timestamp);
-                    }
-                    
-                    // Send email to receiver if provided in extraData (key: receiver_id)
-                    if (isset($extraData['receiver_id'])) {
-                        $receiverEmail = $this->getUserEmail($extraData['receiver_id']);
-                        error_log("Retrieved receiver email: " . $receiverEmail);
-                        if ($receiverEmail) {
-                            $this->sendReceiptEmail($receiverEmail, $transactionType, $amount, $transactionId, $timestamp);
-                        }
-                    }
-                } else {
-                    // For other transaction types, send email to the single user.
-                    $userEmail = $this->getUserEmail($userId);
-                    error_log("Retrieved user email: " . $userEmail);
-                    if ($userEmail) {
-                        $this->sendReceiptEmail($userEmail, $transactionType, $amount, $transactionId, $timestamp);
-                    }
-                }
-                
-                return [
-                    "date" => $timestamp,
-                    "transaction_type" => ucfirst($transactionType),
-                    "user_id" => $userId,
-                    "wallet_id" => $walletId,
-                    "amount" => number_format($amount, 2),
-                    "transaction_id" => $transactionId,
-                    "extra_data" => $extraData
-                ];
+            if (!$result) {
+                error_log("Failed to insert receipt: " . print_r($stmt->errorInfo(), true));
+                return false;
             }
-            return false;
+
+            // Send email
+            $this->sendEmails($transactionType, $userId, $amount, $transactionId, $timestamp, $extraData);
+            
+            return [
+                "date" => $timestamp,
+                "transaction_type" => ucfirst($transactionType),
+                "user_id" => $userId,
+                "wallet_id" => $walletId,
+                "amount" => number_format($amount, 2),
+                "transaction_id" => $transactionId,
+                "extra_data" => $extraData
+            ];
         } catch (PDOException $e) {
             error_log("Receipt creation failed: " . $e->getMessage());
             return false;
@@ -90,23 +73,47 @@ class Receipt {
     }
 
     /**
-     * Retrieves the user's email address from the database.
+     * Handles email sending for single and p2p transactions.
+     */
+    private function sendEmails($transactionType, $userId, $amount, $transactionId, $timestamp, $extraData) {
+        try {
+            $userEmail = $this->getUserEmail($userId);
+            if ($userEmail) {
+                $this->sendReceiptEmail($userEmail, $transactionType, $amount, $transactionId, $timestamp);
+            }
+
+            if ($transactionType === 'p2p' && isset($extraData['receiver_id'])) {
+                $receiverEmail = $this->getUserEmail($extraData['receiver_id']);
+                if ($receiverEmail) {
+                    $this->sendReceiptEmail($receiverEmail, $transactionType, $amount, $transactionId, $timestamp);
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error sending emails: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Retrieves user email from database.
      */
     private function getUserEmail($userId) {
-        $stmt = $this->pdo->prepare("SELECT email FROM Users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email = $result ? $result['email'] : null;
-        error_log("Retrieved user email: " . $email);
-        return $email;
+        try {
+            $stmt = $this->pdo->prepare("SELECT email FROM Users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result['email'] : null;
+        } catch (PDOException $e) {
+            error_log("Failed to fetch user email: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**
      * Sends a receipt email using PHPMailer.
      */
     private function sendReceiptEmail($email, $transactionType, $amount, $transactionId, $timestamp) {
-        $mail = new PHPMailer(true);
         try {
+            $mail = new PHPMailer(true);
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -129,11 +136,8 @@ class Receipt {
                 <br><p>Thank you for using EcoPay.</p>
             ";
 
-            if (!$mail->send()) {
-                error_log("Mailer Error: " . $mail->ErrorInfo);
-            } else {
-                error_log("Receipt email sent successfully to " . $email);
-            }
+            $mail->send();
+            error_log("Receipt email sent successfully to " . $email);
         } catch (Exception $e) {
             error_log("PHPMailer Exception: " . $e->getMessage());
         }
