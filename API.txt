@@ -1,0 +1,1029 @@
+## Admin Login
+
+**Endpoint:** `/EcoPay_backend/V2/admin_login.php`
+
+**Method:** POST
+
+**Description:** Authenticates an admin user and starts a session upon successful login.
+
+**Parameters:**
+
+*   `email` (string, required): Admin's email address.
+*   `password` (string, required): Admin's password.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `Admin login successful!`
+*   Sets `$_SESSION["admin_id"]`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `Email and password required.` (if email or password is empty)
+*   Content: `Invalid admin credentials.` (if email/password combination is incorrect)
+*   Content: `Admin login error: [error message]` (if a database error occurs)
+
+**Example Postman Test:**
+
+```json
+{
+    "email": "admin@gmail.com",
+    "password": "your_admin_password"
+}
+```
+
+## Admin Registration
+
+**Endpoint:** `/EcoPay_backend/V2/admin_register.php`
+
+**Method:** POST
+
+**Description:** Registers a new admin user in the system.
+
+**Parameters:**
+
+*   `fullName` (string, required): Admin's full name.
+*   `email` (string, required): Admin's email address.
+*   `password` (string, required): Admin's password.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `Admin registered!`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `All fields required.` (if any required field is empty)
+*   Content: `Invalid email.` (if the email format is invalid)
+*   Content: `Registration failed.` (if registration fails)
+*   Content: `Registration error: [error message]` (if a database error occurs)
+
+**Example Postman Test:**
+
+```json
+{
+    "fullName": "Admin Test",
+    "email": "test@example.com",
+    "password": "securePassword"
+}
+```
+
+## Create QR Code
+
+**Endpoint:** `/EcoPay_backend/V2/create_qr_code.php`
+
+**Method:** POST
+
+**Description:** Creates a new QR code record in the database.
+
+**Parameters:**
+
+*   `user_id` (integer, required): The ID of the user receiving the QR code payment.
+*   `wallet_id` (integer, required): The ID of the user's wallet to credit.
+*   `amount` (numeric, required): The amount to be transferred via the QR code.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"success": true, "qr_code_id": [qr_code_id]}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "Invalid JSON format"}` (if the JSON is invalid)
+*   Content: `{"error": "user_id is missing or invalid"}`
+*   Content: `{"error": "wallet_id is missing or invalid"}`
+*   Content: `{"error": "amount is missing or invalid"}`
+*   Content: `{"error": "QR Code creation failed: [error message]"}` (if a database error occurs)
+
+**Example Postman Test:**
+
+```json
+{
+    "user_id": 123,
+    "wallet_id": 456,
+    "amount": 10.50
+}
+```
+
+## Deposit
+
+**Endpoint:** `/EcoPay_backend/V2/deposit.php`
+
+**Method:** POST
+
+**Description:** Deposits funds into a user's wallet. Requires user to be logged in.
+
+**Parameters:**
+
+*   `wallet_id` (integer, required): The ID of the wallet to deposit into.
+*   `amount` (numeric, required): The amount to deposit.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "success": true,
+        "message": "Deposit successful",
+        "transaction_id": [transaction_id],
+        "receipt": [receipt_data]
+    }
+    ```
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"success": false, "message": "User not logged in."}`
+*   Content: `{"success": false, "message": "Invalid request method."}`
+*   Content: `{"success": false, "message": "Missing wallet_id or amount."}`
+*   Content: `{"success": false, "message": "Invalid wallet ID or amount."}`
+*   Content: `{"success": false, "message": "Wallet not found."}`
+*   Content: `{"success": false, "message": "Balance update failed."}`
+*   Content: `{"success": false, "message": "Failed to record transaction."}`
+*   Content: `{"success": false, "message": "Failed to generate receipt."}`
+*   Content: `{"success": false, "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "wallet_id": 789,
+    "amount": 20.00
+}
+```
+
+## Email Verification
+
+**Endpoint:** `/EcoPay_backend/V2/email_verify.php`
+
+**Method:** POST
+
+**Description:** Sends a new OTP to the user's email for verification.
+
+**Parameters:**
+
+*   `email` (string, required): The email address to send the OTP to.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "New OTP sent to your email."}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Email is required."}`
+*   Content: `{"status": "error", "message": "Email cannot be empty."}`
+*   Content: `{"status": "error", "message": "Invalid email format."}`
+*   Content: `{"status": "error", "message": "User not found."}`
+*   Content: `{"status": "error", "message": "Failed to update OTP."}`
+*   Content: `{"status": "error", "message": "Mailer Error: [error message]"}`
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "email": "user@example.com"
+}
+```
+
+## Get ID Document
+
+**Endpoint:** `/EcoPay_backend/V2/get_id_doc.php`
+
+**Method:** GET
+
+**Description:** Retrieves the link to the user's ID document. Requires user to be logged in.
+
+**Parameters:**
+
+*   None (relies on `$_SESSION['user_id']`)
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "id_document": "[link_to_id_document]"}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Not logged in"}`
+*   Content: `{"status": "error", "message": "No ID document found for this user"}`
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+*   This endpoint requires a valid session cookie (`$_SESSION['user_id']`).  In Postman, you would typically configure the request to send the session cookie obtained after a successful login.  There are no body parameters for this GET request.
+
+## Get QR Code Data
+
+**Endpoint:** `/EcoPay_backend/V2/get_qr_code_data.php`
+
+**Method:** GET, POST
+
+**Description:** Retrieves data associated with a given QR code ID.
+
+**Parameters:**
+
+*   `data` (integer, required): The ID of the QR code. Can be passed as a GET parameter or in the POST request body.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"success": true, "qr_code": {"user_id": [user_id], "wallet_id": [wallet_id], "amount": [amount]}}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "QR Code ID is missing or invalid"}`
+*   Content: `{"error": "QR Code not found"}`
+*   Content: `{"error": "QR Code fetching failed: [error message]"}`
+
+**Example Postman Test (GET):**
+
+`/EcoPay_backend/V2/get_qr_code_data.php?data=123`
+
+**Example Postman Test (POST):**
+
+```json
+{
+    "data": 123
+}
+```
+
+## Get User ID
+
+**Endpoint:** `/EcoPay_backend/V2/get_user_id.php`
+
+**Method:** GET
+
+**Description:** Retrieves a user ID based on different request types.
+
+**Parameters:**
+
+*   `qr` (string, optional): If set to "true", retrieves the user ID from the session for QR transfers.
+*   `email` (string, optional): If provided, retrieves the user ID associated with the given email address.
+
+**Success Response (QR Transfer):**
+
+*   Code: 200 OK
+*   Content: `{"userId": [user_id]}` (if user is logged in)
+
+**Success Response (Email Transfer):**
+
+*   Code: 200 OK
+*   Content: `{"userId": [user_id]}` (if user with the given email is found)
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "User not logged in"}` (if `qr=true` and user is not logged in)
+*   Content: `{"error": "Database connection failed"}` (if database connection fails when using email)
+*   Content: `{"error": "User not found"}` (if user with the given email is not found)
+*   Content: `{"error": "Invalid request"}` (if no valid request type is provided)
+
+**Example Postman Test (QR Transfer):**
+
+`/EcoPay_backend/V2/get_user_id.php?qr=true` (requires a valid session)
+
+**Example Postman Test (Email Transfer):**
+
+`/EcoPay_backend/V2/get_user_id.php?email=user@example.com`
+
+## Get Wallets
+
+**Endpoint:** `/EcoPay_backend/V2/get_wallets.php`
+
+**Method:** GET
+
+**Description:** Retrieves a list of wallets for the logged-in user.
+
+**Parameters:**
+
+*   None (relies on `$_SESSION["user_id"]`)
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "status": "success",
+        "wallets": [
+            {
+                "wallet_id": [wallet_id],
+                "wallet_name": "[wallet_name]",
+                "balance": [balance],
+                "currency": "[currency]",
+                "is_default": [is_default]
+            },
+            ...
+        ]
+    }
+    ```
+
+**Error Responses:**
+
+*   Code: 405 Method Not Allowed
+*   Content: `{"status": "error", "message": "Invalid request method. GET required."}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "User not logged in."}`
+
+**Example Postman Test:**
+
+*   This endpoint requires a valid session cookie (`$_SESSION['user_id']`). In Postman, you would typically configure the request to send the session cookie obtained after a successful login. There are no body parameters for this GET request.
+
+## Identity Verification
+
+**Endpoint:** `/EcoPay_backend/V2/identity_verification.php`
+
+**Method:** POST
+
+**Description:** Updates the identity verification status of a user. Requires admin login.
+
+**Parameters:**
+
+*   `user_id` (integer, required): The ID of the user to update.
+*   `verification_type` (string, required): The type of verification to update. Possible values: `document_verified`, `super_verified`.
+*   `status` (string, required): The new status. Possible values: `true`, `false`.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `Verification status updated successfully.`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `Admin not logged in.`
+*   Code: `Invalid input.`
+*   Content: `Failed to update verification status.`
+*   Content: `Database error: [error message]`
+*   Content: `Invalid request method.`
+
+**Example Postman Test:**
+
+```json
+{
+    "user_id": 123,
+    "verification_type": "document_verified",
+    "status": "true"
+}
+```
+
+## Insert Admin User
+
+**Endpoint:** `/EcoPay_backend/V2/insert_admin_user.php`
+
+**Method:** GET
+
+**Description:** Inserts a new admin user into the database with a pre-defined username, email, and a hashed password. **Note:** This script is intended for initial setup and should be used with caution.
+
+**Parameters:**
+
+*   None
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `Admin user inserted successfully (HASHED PASSWORD)!`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `Error inserting admin user: [error message]` (if a database error occurs)
+
+**Example Postman Test:**
+
+*   This endpoint is typically accessed directly via a browser or a simple GET request. No specific parameters are needed. However, it's crucial to ensure this script is not exposed publicly after initial setup due to security concerns.
+
+## Login
+
+**Endpoint:** `/EcoPay_backend/V2/login.php`
+
+**Method:** POST
+
+**Description:** Authenticates a user and starts a session upon successful login.
+
+**Parameters:**
+
+*   `email` (string, required): User's email address.
+*   `password` (string, required): User's password.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "status": "success",
+        "message": "Login successful!",
+        "user": {
+            "id": [user_id],
+            "userName": "[userName]",
+            "fName": "[fName]",
+            "lName": "[lName]",
+            "email": "[email]"
+        },
+        "user_id": [user_id]
+    }
+    ```
+*   Sets `$_SESSION["user_id"]`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "POST requests only."}`
+*   Content: `{"status": "error", "message": "Email and password are required."}`
+*   Content: `{"status": "error", "message": "Incorrect password."}`
+*   Content: `{"status": "error", "message": "User not found."}`
+*   Content: `{"status": "error", "message": "Database connection failed."}`
+*   Content: `{"status": "error", "message": "Login error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "email": "user@example.com",
+    "password": "your_password"
+}
+```
+
+## Manage Transactions
+
+**Endpoint:** `/EcoPay_backend/V2/manage_transactions.php`
+
+**Method:** GET
+
+**Description:** Retrieves a list of transactions, with filtering and search capabilities. Requires admin login.
+
+**Parameters:**
+
+*   `filter_type` (string, optional): Filters transactions by type (e.g., 'deposit', 'withdraw', 'transfer').
+*   `filter_status` (string, optional): Filters transactions by status (e.g., 'pending', 'completed', 'failed').
+*   `search_user_id` (integer, optional): Filters transactions by user ID.
+*   `start_date` (string, optional): Filters transactions with a timestamp after this date (YYYY-MM-DD).
+*   `end_date` (string, optional): Filters transactions with a timestamp before this date (YYYY-MM-DD).
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    [
+        {
+            "id": [transaction_id],
+            "user_id": [user_id],
+            "wallet_id": [wallet_id],
+            "type": "[type]",
+            "amount": [amount],
+            "status": "[status]",
+            "timestamp": "[timestamp]"
+        },
+        ...
+    ]
+    ```
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `Admin not logged in.`
+*   Code: 500 Internal Server Error
+*   Content: `{"error": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+*   This endpoint requires a valid session cookie (`$_SESSION["admin_id"]`). In Postman, you would typically configure the request to send the session cookie obtained after a successful login.
+
+`/EcoPay_backend/V2/manage_transactions.php?filter_type=deposit&filter_status=completed&search_user_id=123&start_date=2024-01-01&end_date=2024-01-31`
+
+## Manage Users
+
+**Endpoint:** `/EcoPay_backend/V2/manage_users.php`
+
+**Method:** GET
+
+**Description:** Retrieves a list of users, with filtering and search capabilities. Requires admin login.
+
+**Parameters:**
+
+*   `search_keyword` (string, optional): Searches users by name, email, or phone.
+*   `filter_verified` (string, optional): Filters users by verification status (true/false).
+*   `sort_column` (string, optional): Sorts users by a specific column (default: `created_at`).
+*   `sort_order` (string, optional): Sorts users in ascending or descending order (default: `DESC`).
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    [
+        {
+            "id": [user_id],
+            "userName": "[userName]",
+            "fName": "[fName]",
+            "lName": "[lName]",
+            "email": "[email]",
+            "created_at": "[created_at]",
+            "email_verified": [email_verified],
+            "document_verified": [document_verified],
+            "super_verified": [super_verified]
+        },
+        ...
+    ]
+    ```
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `Admin not logged in.`
+*   Code: 500 Internal Server Error
+*   Content: `{"error": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+*   This endpoint requires a valid session cookie (`$_SESSION["admin_id"]`). In Postman, you would typically configure the request to send the session cookie obtained after a successful login.
+
+`/EcoPay_backend/V2/manage_users.php?search_keyword=test&filter_verified=true&sort_column=userName&sort_order=ASC`
+
+## P2P Transfer
+
+**Endpoint:** `/EcoPay_backend/V2/p2p_transfer.php`
+
+**Method:** POST
+
+**Description:** Transfers funds from one user's wallet to another, either by QR code or receiver email.
+
+**Parameters:**
+
+*   `action` (string, required): Must be `p2pTransfer`.
+*   `sender_wallet_id` (integer, required): The ID of the sender's wallet.
+*   `amount` (numeric, required): The amount to transfer.
+*   `qr_code_id` (integer, optional): The ID of the QR code (if transferring via QR code).
+*   `receiver_email` (string, optional): The email address of the receiver (if transferring via email).
+*    `receiver_identifier` (string, optional): The email address of the receiver (if transferring via email).
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "status": "success",
+        "message": "Transfer successful!",
+        "transaction_id": [transaction_id],
+        "receipt": [receipt_data]
+    }
+    ```
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "Invalid JSON format"}`
+*   Content: `{"error": "Missing action parameter."}`
+*   Content: `{"error": "Database connection error"}`
+*   Content: `{"error": "Invalid sender wallet ID"}`
+*   Content: `{"error": "Invalid transfer amount"}`
+*   Content: `{"error": "Sender wallet not found"}`
+*   Content: `{"error": "Invalid or already used QR code"}`
+*   Content: `{"error": "Receiver email not found."}`
+*   Content: `{"error": "No valid QR code or receiver email provided."}`
+*   Content: `{"error": "Cannot transfer to yourself"}`
+*   Content: `{"error": "Insufficient balance"}`
+*   Content: `{"error": "Receiver's default wallet not found"}`
+*   Content: `{"error": "Failed to record transaction"}`
+*   Content: `{"success": false, "message": "Failed to generate receipt."}`
+*   Content: `{"success": false, "message": [error message]}`
+
+**Example Postman Test (Transfer via Email):**
+
+```json
+{
+    "action": "p2pTransfer",
+    "sender_wallet_id": 123,
+    "amount": 10.00,
+    "receiver_email": "receiver@example.com"
+}
+```
+
+**Example Postman Test (Transfer via QR Code):**
+
+```json
+{
+    "action": "p2pTransfer",
+    "sender_wallet_id": 123,
+    "amount": 10.00,
+    "qr_code_id": 456
+}
+```
+
+## Process Transaction
+
+**Endpoint:** `/EcoPay_backend/V2/process_transaction.php`
+
+**Method:** POST
+
+**Description:** Processes a transaction by transferring funds from a sender's wallet to a recipient's wallet using a QR code.
+
+**Parameters:**
+
+*   `sender_wallet_id` (integer, required): The ID of the sender's wallet.
+*   `qr_code_id` (integer, required): The ID of the QR code.
+*   `amount` (numeric, required): The amount to transfer.
+*   `user_id` (integer, required): The ID of the sender.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "Transaction successful!"}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Missing required parameters."}`
+*   Content: `{"status": "error", "message": "Invalid amount."}`
+*   Content: `{"status": "error", "message": "Wallet not found."}`
+*   Content: `{"status": "error", "message": "Insufficient balance."}`
+*   Content: `{"status": "error", "message": "Invalid QR Code."}`
+
+**Example Postman Test:**
+
+```json
+{
+    "sender_wallet_id": 123,
+    "qr_code_id": 456,
+    "amount": 10.00,
+    "user_id": 789
+}
+```
+
+## Profile
+
+**Endpoint:** `/EcoPay_backend/V2/profile.php`
+
+**Method:** GET
+
+**Description:** Retrieves the profile information for the logged-in user.
+
+**Parameters:**
+
+*   None (relies on `$_SESSION["user_id"]`)
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "status": "success",
+        "user": {
+            "userName": "[userName]",
+            "fName": "[fName]",
+            "lName": "[lName]",
+            "email": "[email]",
+            "address": "[address]",
+            "dob": "[dob]",
+            "profile_pic": "[profile_pic]",
+            "document_verified": [document_verified],
+            "super_verified": 1,
+            "name": "[name]"
+        }
+    }
+    ```
+
+**Error Responses:**
+
+*   Code: 405 Method Not Allowed
+*   Content: `{"status": "error", "message": "Invalid request method. GET required."}`
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "User not logged in."}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+*   This endpoint requires a valid session cookie (`$_SESSION['user_id']`). In Postman, you would typically configure the request to send the session cookie obtained after a successful login. There are no body parameters for this GET request.
+
+## QR Transfer
+
+**Endpoint:** `/EcoPay_backend/V2/qr.php`
+
+**Method:** POST
+
+**Description:** Processes a QR code transfer, transferring funds from a sender's wallet to the receiver specified in the QR code.
+
+**Parameters:**
+
+*   `qr_code_id` (integer, required): The ID of the QR code.
+*   `sender_wallet_id` (integer, required): The ID of the sender's wallet.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    {
+        "status": "success",
+        "message": "QR transfer successful.",
+        "transaction_id": [transaction_id],
+        "receipt": [receipt_data]
+    }
+    ```
+
+**Error Responses:**
+
+*   Code: 400 Bad Request
+*   Content: `{"error": "Invalid JSON format."}`
+*   Content: `{"error": "Missing required fields."}`
+*   Content: `{"error": "Invalid or already used QR code."}`
+*   Content: `{"error": "Sender wallet not found."}`
+*   Content: `{"error": "Cannot transfer to yourself."}`
+*   Content: `{"error": "Insufficient balance."}`
+*   Content: `{"error": "Receiver's default wallet not found."}`
+*   Code: 500 Internal Server Error
+*   Content: `{"error": "Failed to record transaction."}`
+*   Content: `{"error": "Failed to generate receipt."}`
+*   Content: `{"error": "An error occurred: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "qr_code_id": 123,
+    "sender_wallet_id": 456
+}
+```
+
+## QR Transfer (Secondary Endpoint)
+
+**Endpoint:** `/EcoPay_backend/V2/qr_transfer.php`
+
+**Method:** GET
+
+**Description:** Processes a QR code transfer by calling the p2p_transfer.php endpoint. This endpoint acts as a wrapper.
+
+**Parameters:**
+
+*   `qr_code` (integer, required): The ID of the QR code.
+*   `sender_wallet_id` (string, required): The ID of the sender's wallet.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"success": true, "message": "QR transfer successful"}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "QR code ID missing"}`
+*   Content: `{"error": "Sender wallet ID missing"}`
+*   Content: `{"error": "Invalid QR code"}`
+*   Content: `{"error": "QR transfer failed: [error message]"}`
+
+**Example Postman Test:**
+
+`/EcoPay_backend/V2/qr_transfer.php?qr_code=123&sender_wallet_id=456`
+
+## Recurring Payments
+
+**Endpoint:** `/EcoPay_backend/V2/rp.php`
+
+**Method:** POST
+
+**Description:** Schedules a recurring payment from a sender to a receiver.
+
+**Parameters:**
+
+*   `sender_wallet_id` (integer, required): The ID of the sender's wallet.
+*   `receiver_email` (string, required): The email address of the receiver.
+*   `amount` (numeric, required): The amount to transfer.
+*   `frequency` (string, required): The frequency of the recurring payment (e.g., daily, weekly, monthly, yearly).
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "Recurring payment scheduled successfully."}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Invalid sender wallet ID."}`
+*   Content: `{"status": "error", "message": "Invalid receiver email."}`
+*   Content: `{"status": "error", "message": "Invalid amount."}`
+*   Content: `{"status": "error", "message": "Invalid frequency."}`
+*   Content: `{"status": "error", "message": "Invalid sender wallet."}`
+*   Content: `{"status": "error", "message": "Receiver not found."}`
+*   Content: `{"status": "error", "message": "Receiver does not have a default wallet."}`
+*   Content: `{"status": "error", "message": "Insufficient balance."}`
+*   Content: `{"status": "error", "message": "Transfer failed: [error message]"}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "sender_wallet_id": 123,
+    "receiver_email": "receiver@example.com",
+    "amount": 10.00,
+    "frequency": "monthly"
+}
+```
+
+## Register
+
+**Endpoint:** `/EcoPay_backend/V2/register.php`
+
+**Method:** POST
+
+**Description:** Registers a new user in the system and sends an OTP to their email.
+
+**Parameters:**
+
+*   `userName` (string, required): The username for the new user.
+*   `fName` (string, required): The first name of the new user.
+*   `lName` (string, required): The last name of the new user.
+*   `email` (string, required): The email address of the new user.
+*   `password` (string, required): The password for the new user.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "User registered successfully. OTP sent to your email.", "user_id": [user_id]}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Missing required fields."}`
+*   Content: `{"status": "error", "message": "All fields are required."}`
+*   Content: `{"status": "error", "message": "Invalid email format."}`
+*   Content: `{"status": "error", "message": "Username already taken."}`
+*   Content: `{"status": "error", "message": "Email already registered."}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "userName": "newuser",
+    "fName": "John",
+    "lName": "Doe",
+    "email": "newuser@example.com",
+    "password": "securePassword"
+}
+```
+
+## Send Receipt
+
+**Endpoint:** `/EcoPay_backend/V2/send_receipts.php`
+
+**Method:** POST
+
+**Description:** Sends a transaction receipt to the specified email address.
+
+**Parameters:**
+
+*   `email` (string, required): The email address to send the receipt to.
+*   `transaction_id` (integer, required): The ID of the transaction for which to send the receipt.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "Receipt sent to email."}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Email and Transaction ID are required."}`
+*   Content: `{"status": "error", "message": "Invalid email format."}`
+*   Content: `{"status": "error", "message": "User not found."}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+*   Content: `{"status": "error", "message": "Mailer Error: [error message]"}`
+*   Content: `{"status": "error", "message": "Failed to generate receipt."}`
+
+**Example Postman Test:**
+
+```json
+{
+    "email": "user@example.com",
+    "transaction_id": 123
+}
+```
+
+## Transactions History Received P2P
+
+**Endpoint:** `/EcoPay_backend/V2/transactions_history_received_p2p.php`
+
+**Method:** GET
+
+**Description:** Retrieves the history of P2P transactions received by a user.
+
+**Parameters:**
+
+*   `user_id` (integer, optional): The ID of the user. If not provided, it attempts to retrieve it from the session.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content:
+    ```json
+    [
+        {
+            "transaction_id": [transaction_id],
+            "sender_id": [sender_id],
+            "receiver_id": [receiver_id],
+            "type": "[type]",
+            "amount": [amount],
+            "status": "[status]",
+            "timestamp": "[timestamp]",
+            "fName": "[fName]",
+            "lName": "[lName]",
+            "sender_email": "[sender_email]"
+        },
+        ...
+    ]
+    ```
+
+**Error Responses:**
+
+*   Code: 200 OK
+
+**Endpoint:** `/EcoPay_backend/V2/qr_transfer.php`
+
+**Method:** GET
+
+**Description:** Processes a QR code transfer by calling the p2p_transfer.php endpoint. This endpoint acts as a wrapper.
+
+**Parameters:**
+
+*   `qr_code` (integer, required): The ID of the QR code.
+*   `sender_wallet_id` (string, required): The ID of the sender's wallet.
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"success": true, "message": "QR transfer successful"}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"error": "QR code ID missing"}`
+*   Content: `{"error": "Sender wallet ID missing"}`
+*   Content: `{"error": "Invalid QR code"}`
+*   Content: `{"error": "QR transfer failed: [error message]"}`
+
+**Example Postman Test:**
+
+`/EcoPay_backend/V2/qr_transfer.php?qr_code=123&sender_wallet_id=456`
+
+**Endpoint:** `/EcoPay_backend/V2/rp.php`
+
+**Method:** POST
+
+**Description:** Schedules a recurring payment from a sender to a receiver.
+
+**Parameters:**
+
+*   `sender_wallet_id` (integer, required): The ID of the sender's wallet.
+*   `receiver_email` (string, required): The email address of the receiver.
+*   `amount` (numeric, required): The amount to transfer.
+*   `frequency` (string, required): The frequency of the recurring payment (e.g., daily, weekly, monthly, yearly).
+
+**Success Response:**
+
+*   Code: 200 OK
+*   Content: `{"status": "success", "message": "Recurring payment scheduled successfully."}`
+
+**Error Responses:**
+
+*   Code: 200 OK
+*   Content: `{"status": "error", "message": "Invalid sender wallet ID."}`
+*   Content: `{"status": "error", "message": "Invalid receiver email."}`
+*   Content: `{"status": "error", "message": "Invalid amount."}`
+*   Content: `{"status": "error", "message": "Invalid frequency."}`
+*   Content: `{"status": "error", "message": "Invalid sender wallet."}`
+*   Content: `{"status": "error", "message": "Receiver not found."}`
+*   Content: `{"status": "error", "message": "Receiver does not have a default wallet."}`
+*   Content: `{"status": "error", "message": "Insufficient balance."}`
+*   Content: `{"status": "error", "message": "Transfer failed: [error message]"}`
+*   Code: 500 Internal Server Error
+*   Content: `{"status": "error", "message": "Database error: [error message]"}`
+
+**Example Postman Test:**
+
+```json
+{
+    "sender_wallet_id": 123,
+    "receiver_email": "receiver@example.com",
+    "amount": 10.00,
+    "frequency": "monthly"
+}

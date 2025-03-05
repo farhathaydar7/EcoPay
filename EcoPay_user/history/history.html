@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your transaction history including deposits and withdrawals.">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="body">
+  <div class="main-content">
+    <div id="navbar-container"></div>
+    <script>
+      fetch('../navbar.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('navbar-container').innerHTML = data;
+        });
+    </script>
+    <div class="container">
+        <h1>Transaction History</h1>
+        <div id="message" class="message" aria-live="polite">Loading transactions...</div>
+
+        <h2>Sent P2P Transactions</h2>
+        <table id="sentP2pTransactionTable" class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sent P2P Transactions will be displayed here -->
+            </tbody>
+        </table>
+
+        <h2>Received P2P Transactions</h2>
+        <table id="receivedP2pTransactionTable" class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Received P2P Transactions will be displayed here -->
+            </tbody>
+        </table>
+
+        <h2>Other Transactions</h2>
+        <table id="otherTransactionTable" class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Other Transactions will be displayed here -->
+            </tbody>
+        </table>
+    </div>
+    <script src="../axios.min.js"></script>
+    <script src="history.js" defer></script>
+</body>
+</html>
