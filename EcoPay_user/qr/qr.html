@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Transfer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Include Axios from CDN -->
+  <script src="../axios.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="body">
+  <div class="container">
+    <h1>QR Transfer</h1>
+    <div id="message" class="message"></div>
+    <form id="qrForm">
+      <label for="sender_wallet_id">Select Wallet</label>
+      <select id="sender_wallet_id" name="sender_wallet_id" required class="form-control">
+        <option value="">-- Select a wallet --</option>
+      </select>
+      
+      <label for="amount">Amount</label>
+      <input type="number" id="amount" name="amount" readonly required class="form-control">
+      
+      <button type="submit" class="btn-primary">Submit Transfer</button>
+    </form>
+  </div>
+
+  <!-- Link to the standalone JavaScript file -->
+  <script src="qr.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="body">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="main-content">
+    <div id="navbar-container"></div>
+    <script>
+      fetch('../navbar.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('navbar-container').innerHTML = data;
+        });
+    </script>
+    <div class="register-container container">
+        <h2>Register</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="userName">Username:</label>
+                <input type="text" id="userName" name="userName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="fName">First Name:</label>
+                <input type="text" id="fName" name="fName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="lName">Last Name:</label>
+                <input type="text" id="lName" name="lName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" id="register-button" class="btn-primary">Register</button>
+             <div class="form-group" id="otp-group" style="display: none;">
+                <label for="otp">OTP:</label>
+                <input type="text" id="otp" name="otp" class="form-control">
+                <button type="button" id="verify-otp-button" class="btn-primary">Verify OTP</button>
+                <button type="button" id="resend-otp-button" class="btn-primary">Resend OTP</button>
+            </div>
+            <input type="hidden" id="userEmail" name="userEmail">
+            <div id="message" class="message"></div>
+        </form>
+        <p>Already registered? <a href="../login/login.html">Login here</a></p>
+    </div>
+    <script src="../axios.min.js"></script>
+    <script src="register.js"></script>
+    <script src="../universal.js"></script>
+</body>
+</html>
