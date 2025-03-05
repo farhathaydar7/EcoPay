@@ -70,8 +70,6 @@ try {
 
     // Record Transaction 
 
-    // Record Transaction (withdrawals recorded as negative amount)
-
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp) 
                            VALUES (?, ?, 'withdraw', ?, 'completed', NOW())");
     // Amount is negative for withdrawal
