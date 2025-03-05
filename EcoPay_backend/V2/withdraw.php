@@ -66,6 +66,14 @@ try {
         echo json_encode(["success" => false, "message" => "Failed to update balance."]);
         exit;
 
+<<<<<<< HEAD
+=======
+
+    // Record Transaction 
+
+    // Record Transaction (withdrawals recorded as negative amount)
+
+>>>>>>> ba26cc508e93d2a33bf33a99533a0c328aed3bf2
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp) 
                            VALUES (?, ?, 'withdraw', ?, 'completed', NOW())");
     // Amount is negative for withdrawal
@@ -79,6 +87,7 @@ try {
         echo json_encode(["success" => false, "message" => "Failed to record transaction."]);
         exit;
     }
+
 
     error_log("Before createReceipt - transactionId: " . $transactionId);
 
