@@ -27,6 +27,10 @@ EcoPay is a digital payment platform designed to facilitate various financial tr
     - **config.php**: Configuration file for database credentials, email settings, and API base URL.
     - **db_connection.php**:  File for establishing a database connection.
 - **database_schema.sql**: SQL schema for the EcoPay database.
+## ER Diagrame :
+
+![ER_diagram](https://github.com/user-attachments/assets/4baad7e4-7316-4c9d-a28c-d43420b54aea)
+
 
 ## Key API Endpoints
 
