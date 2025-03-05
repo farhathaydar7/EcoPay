@@ -97,12 +97,8 @@ try {
     ]);
 
     error_log("After createReceipt - receiptData: " . print_r($receiptData, true));
-
     if (!$receiptData) {
         error_log("createReceipt returned false");
-
-
-    if (!$receiptData) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
