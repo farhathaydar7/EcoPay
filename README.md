@@ -31,6 +31,9 @@ EcoPay is a digital payment platform designed to facilitate various financial tr
 
 ![ER_diagram](https://github.com/user-attachments/assets/4baad7e4-7316-4c9d-a28c-d43420b54aea)
 
+## Components Diagrame :
+![Component_diagram](https://github.com/user-attachments/assets/ad17600b-b79c-4d88-a640-b709ae4c4949)
+
 
 ## Key API Endpoints
 
