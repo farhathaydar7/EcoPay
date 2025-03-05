@@ -28,6 +28,20 @@ EcoPay is a digital payment platform designed to facilitate various financial tr
     - **db_connection.php**:  File for establishing a database connection.
 - **database_schema.sql**: SQL schema for the EcoPay database.
 
+## ER Diagrame :
+
+![ER_diagram](https://github.com/user-attachments/assets/4baad7e4-7316-4c9d-a28c-d43420b54aea)
+
+## Components Diagrame :
+![Component_diagram](https://github.com/user-attachments/assets/ad17600b-b79c-4d88-a640-b709ae4c4949)
+
+## Hosting Details :
+    - **IP address**: 52.47.95.15
+    - **DNS**: http://ec2-52-47-95-15.eu-west-3.compute.amazonaws.com/
+    - **URL**: http://52.47.95.15/EcoPay_user/login/login.html
+    
+
+
 ## Key API Endpoints
 
 The following are some of the key API endpoints available in `EcoPay_backend/V2/`:

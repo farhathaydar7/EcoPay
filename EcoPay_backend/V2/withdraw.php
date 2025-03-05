@@ -67,7 +67,11 @@ try {
         exit;
     }
 
+
     // Record Transaction 
+
+    // Record Transaction (withdrawals recorded as negative amount)
+
     $stmt = $pdo->prepare("INSERT INTO Transactions (user_id, wallet_id, type, amount, status, timestamp) 
                            VALUES (?, ?, 'withdraw', ?, 'completed', NOW())");
     // Amount is negative for withdrawal
@@ -82,17 +86,23 @@ try {
         exit;
     }
 
+
     error_log("Before createReceipt - transactionId: " . $transactionId);
+
     // Create and store receipt using the Receipt model
     $receiptModel = new Receipt($pdo);
     $receiptData = $receiptModel->createReceipt('withdrawal', $userId, $walletId, $amount, $transactionId, [
         "method" => "Bank Transfer",
         "status" => "Completed"
     ]);
+
     error_log("After createReceipt - receiptData: " . print_r($receiptData, true));
 
     if (!$receiptData) {
         error_log("createReceipt returned false");
+
+
+    if (!$receiptData) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
